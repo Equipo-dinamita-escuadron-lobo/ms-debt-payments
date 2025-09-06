@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: PAYMENTS
+
+  profiles:
+    active:
+    - ${PROFILE:dev}
