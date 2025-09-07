@@ -5,17 +5,19 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import debt_payments.application.input.IReceiptCommandUseCase;
 import debt_payments.application.input.IReceiptQueryUseCase;
 import debt_payments.application.output.IInvoiceProviderPort;
 import debt_payments.application.output.IReceiptCommandPersistencePort;
 import debt_payments.application.output.IReceiptQueryPersistencePort;
-import debt_payments.application.output.IThirdPartyProviderPort;
+import debt_payments.domain.exception.InvoiceNotFoundException;
+import debt_payments.domain.exception.ReceiptNotFoundException;
 import debt_payments.domain.model.Receipt;
 import debt_payments.domain.model.ReceiptDetail;
 import debt_payments.domain.model.ReceiptStatus;
-import jakarta.transaction.Transactional;
+import debt_payments.domain.model.Replica.InvoiceReplica;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -24,86 +26,111 @@ public class ReceiptService implements IReceiptCommandUseCase, IReceiptQueryUseC
 
     private final IReceiptCommandPersistencePort receiptCommandPersistencePort;
     private final IReceiptQueryPersistencePort receiptQueryPersistencePort;
-    private final IThirdPartyProviderPort thirdPartyProviderPort;
     private final IInvoiceProviderPort invoiceProviderPort;
 
+    /**
+     * Creates a new receipt after validating external dependencies and generating a unique receipt code.
+     * @param receipt The receipt to be created.
+     * @return The created receipt with updated fields.
+     */
     @Override
-    @Transactional
     public Receipt createReceipt(Receipt receipt) {
-        validateExternalDependencies(receipt);
+        // validateThirdParty(receipt.getThirdPartyId()); // Validar tercero (desactivado temporalmente)
 
+        Long totalAmount = 0L; // Inicializar total con Long
+
+        if (receipt.isInvoicePayment()) {
+            if (receipt.getDetails() == null || receipt.getDetails().isEmpty()) {
+                throw new IllegalArgumentException("Invoice payment details are required.");
+            }
+            
+            for (ReceiptDetail detail : receipt.getDetails()) {
+                // 1. Buscar la factura
+                InvoiceReplica invoice = invoiceProviderPort.findInvoiceById(detail.getInvoiceId())
+                    .orElseThrow(() -> new IllegalArgumentException("Invoice with id " + detail.getInvoiceId() + " does not exist."));
+
+                // 2. Validar que el pago no exceda el saldo
+                if (detail.getAmountPaid() > invoice.getPendingValue()) {
+                    throw new IllegalArgumentException("Amount paid for invoice " + invoice.getFactCode() + " exceeds the pending balance.");
+                }
+
+                // 3. Actualizar el saldo de la factura
+                invoice.setPendingValue(invoice.getPendingValue() - detail.getAmountPaid());
+                invoice.setTotalPay(invoice.getTotalPay() + detail.getAmountPaid());
+                invoiceProviderPort.updateInvoice(invoice);
+
+                // 4. Guardar el código de la factura en el detalle (Tu petición)
+                detail.setInvoiceCode(invoice.getFactCode());
+                
+                // 5. Sumar al total del recibo
+                totalAmount += detail.getAmountPaid();
+            }
+        }
+
+        // 6. Completar y guardar el recibo
+        receipt.setTotalAmount(totalAmount);
         receipt.setReceiptCode(generateUniqueReceiptCode());
         receipt.setIssueDate(LocalDate.now());
         receipt.setStatus(ReceiptStatus.FINALIZED);
+        
 
-        return receiptCommandPersistencePort.save(receipt);
+        Receipt savedReceipt = receiptCommandPersistencePort.save(receipt);
+
+        return savedReceipt;
     }
 
     @Override
-    @Transactional
     public Receipt voidReceipt(Long receiptId, String reasonDescription) {
         Receipt receiptToVoid = receiptQueryPersistencePort.findById(receiptId)
-            .orElseThrow(() -> new IllegalArgumentException("Receipt with id " + receiptId + " does not exist."));
+            .orElseThrow(() -> new ReceiptNotFoundException("Receipt with id " + receiptId + " does not exist."));
 
-        if(receiptToVoid.getStatus() == ReceiptStatus.VOIDED)
+        if (receiptToVoid.getStatus() == ReceiptStatus.VOIDED) {
             throw new IllegalStateException("Receipt with id " + receiptId + " is already voided.");
+        }
 
+        // 1. Revertir los pagos en las facturas afectadas
+        if (receiptToVoid.isInvoicePayment()) {
+            for (ReceiptDetail detail : receiptToVoid.getDetails()) {
+                InvoiceReplica invoice = invoiceProviderPort.findInvoiceById(detail.getInvoiceId())
+                    .orElseThrow(() -> new InvoiceNotFoundException("Associated invoice with id " + detail.getInvoiceId() + " not found. Data might be inconsistent."));
+
+                // Revertir el saldo de la factura
+                invoice.setPendingValue(invoice.getPendingValue() + detail.getAmountPaid());
+                invoice.setTotalPay(invoice.getTotalPay() - detail.getAmountPaid());
+                invoiceProviderPort.updateInvoice(invoice);
+            }
+        }
+        
+        // 2. Actualizar el estado del recibo
         receiptToVoid.setStatus(ReceiptStatus.VOIDED);
         receiptToVoid.setVoidReasonDescription(reasonDescription);
         receiptToVoid.setVoidDate(LocalDate.now());
-
-        // TODO: Lógica de negocio para la anulación
-        // - Generar un asiento contable de reversión.
-        // - Restaurar los saldos de las facturas afectadas.
 
         return receiptCommandPersistencePort.save(receiptToVoid);
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public Optional<Receipt> findById(Long id) {
         return receiptQueryPersistencePort.findById(id);
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public List<Receipt> findByInvoiceId(String invoiceId) {
         return receiptQueryPersistencePort.findByInvoiceId(invoiceId);
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public List<Receipt> findByThirdPartyId(String thirdPartyId) {
         return receiptQueryPersistencePort.findByThirdPartyId(thirdPartyId);
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public List<Receipt> findByEnterpriseId(String enterpriseId) {
         return receiptQueryPersistencePort.findByEnterpriseId(enterpriseId);
-    }
-
-    private void validateExternalDependencies(Receipt receipt){
-        if (!thirdPartyProviderPort.thirdPartyExists(receipt.getThirdPartyId())) {
-            throw new IllegalArgumentException("Third Party with id " + receipt.getThirdPartyId() + " does not exist.");
-        }
-
-        // Si es un abono a factura, validar las facturas y los montos
-        if(receipt.isInvoicePayment()){
-            if(receipt.getDetails() == null || receipt.getDetails().isEmpty()){
-                throw new IllegalArgumentException("Invoice payment details are required.");
-            }
-
-            for(ReceiptDetail detail: receipt.getDetails()){
-                Long balance = invoiceProviderPort.getInvoiceBalance(detail.getInvoiceId()).
-                orElseThrow(() -> new IllegalArgumentException("Invoice with id " + detail.getInvoiceId() + " does not exist."));
-
-                if(detail.getAmountPaid().compareTo(balance) > 0){
-                    throw new IllegalArgumentException("Amount paid for invoice " + detail.getInvoiceId() + " exceeds the invoice balance.");
-                }
-            }
-            
-        }
     }
 
     private String generateUniqueReceiptCode() {

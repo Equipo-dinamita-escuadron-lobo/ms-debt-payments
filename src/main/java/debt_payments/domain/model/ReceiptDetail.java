@@ -11,6 +11,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class ReceiptDetail {
     private Long id;
-    private Long invoiceId;           
+    private Long invoiceId;  
+    private String invoiceCode;         
     private Long amountPaid;    
 }

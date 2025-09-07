@@ -1,6 +1,5 @@
 package debt_payments.domain.model;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -16,12 +15,13 @@ import lombok.Setter;
 public class Receipt {
     private Long id;
     private String receiptCode;
+    private String enterpriseId;
     private Long thirdPartyId;
     private Long paymentMethodId;
     private Long receiptTypeId;
-    private ReceiptStatus status;;
+    private ReceiptStatus status;
     private LocalDate issueDate;
-    private BigDecimal totalAmount;
+    private Long totalAmount;
     private String observations;
     private String voidReasonDescription;
     private LocalDate voidDate;

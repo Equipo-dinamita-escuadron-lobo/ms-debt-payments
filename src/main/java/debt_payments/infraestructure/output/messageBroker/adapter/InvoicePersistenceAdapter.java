@@ -4,9 +4,12 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import debt_payments.application.output.IInvoiceProviderPort;
+import debt_payments.domain.model.Replica.InvoiceReplica;
 import debt_payments.infraestructure.output.jpa.entity.replicas.InvoiceReplicaEntity;
+import debt_payments.infraestructure.output.jpa.mapper.replicas.IInvoicePersistenceMapper;
 import debt_payments.infraestructure.output.jpa.repository.replicas.IInvoiceRepository;
 import debt_payments.infraestructure.output.messageBroker.dto.InvoiceSyncDto;
 import lombok.RequiredArgsConstructor;
@@ -15,8 +18,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class InvoicePersistenceAdapter implements IInvoiceProviderPort {
 
+    private final IInvoicePersistenceMapper invoiceMapper;
     private final IInvoiceRepository invoiceRepository;
 
+    @Transactional
     public void saveOrUpdate(InvoiceSyncDto dto) {
         InvoiceReplicaEntity entity = invoiceRepository.findById(dto.getFactCode())
             .orElse(new InvoiceReplicaEntity());
@@ -42,6 +47,33 @@ public class InvoicePersistenceAdapter implements IInvoiceProviderPort {
         Optional<InvoiceReplicaEntity> invoiceEntityOptional = invoiceRepository.findById(invoiceId);
 
         return invoiceEntityOptional.map(InvoiceReplicaEntity::getPendingValue);
+    }
+
+    /**
+     * Busca una factura por su ID en la base de datos.
+     * @param invoiceId El ID de la factura a buscar.
+     * @return Un Optional que contiene el objeto de dominio InvoiceReplica si se encuentra,
+     *         o un Optional vacío si no.
+     */
+    @Transactional(readOnly = true) // Es una operación de solo lectura
+    @Override
+    public Optional<InvoiceReplica> findInvoiceById(Long invoiceId) {
+        Optional<InvoiceReplicaEntity> entityOptional = invoiceRepository.findById(invoiceId);
+        return entityOptional.map(invoiceMapper::toDomain);
+    }
+
+    /**
+     * Actualiza una factura en la base de datos.
+     * @param invoice El objeto de dominio InvoiceReplica con los datos actualizados.
+     */
+    @Override
+    @Transactional
+    public void updateInvoice(InvoiceReplica invoice) {
+        InvoiceReplicaEntity obj = invoiceRepository.getReferenceById(invoice.getId());
+        obj.setPendingValue(invoice.getPendingValue());
+        obj.setTotalPay(invoice.getTotalPay());
+        obj.setTotalValue(invoice.getTotalValue());
+        invoiceRepository.save(obj);
     }
 
 }

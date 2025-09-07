@@ -1,7 +1,5 @@
 package debt_payments.infraestructure.input.rest.dto.request;
 
-import java.math.BigDecimal;
-
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Getter;
@@ -15,5 +13,5 @@ public class ReceiptDetailRequest {
     
     @NotNull(message = "Amount paid cannot be null")
     @Positive(message = "Amount paid must be positive")
-    private BigDecimal amountPaid;
+    private Long amountPaid;
 }

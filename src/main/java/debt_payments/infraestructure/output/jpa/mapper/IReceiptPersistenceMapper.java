@@ -15,8 +15,6 @@ import debt_payments.infraestructure.output.jpa.entity.ReceiptEntity;
 @Mapper(componentModel = "spring", 
         unmappedTargetPolicy = ReportingPolicy.IGNORE) // Ignora advertencias si no todos los campos se mapean
 public interface IReceiptPersistenceMapper {
-    
-     // --- Mapeo de Entidad (JPA) a Dominio ---
 
     Receipt toDomain(ReceiptEntity entity);
     List<Receipt> toDomainList(List<ReceiptEntity> entityList);
@@ -26,6 +24,13 @@ public interface IReceiptPersistenceMapper {
     ReceiptDetailEntity toEntity(ReceiptDetail detailDomain);
     List<ReceiptEntity> toEntityList(List<Receipt> domainList);
 
+    /**
+     * Esta anotación le dice a MapStruct que ejecute este método DESPUÉS de haber mapeadoun objeto Receipt a un ReceiptEntity.
+     * @param receiptEntity El objeto de destino (@MappingTarget) que acaba de ser creado.
+     * 
+     * El método itera sobre cada detalle (hijo) y le asigna una referencia a su recibo (padre).
+     * Esto asegura que cuando JPA intente guardar, el vínculo bidireccional esté completoy la columna de la clave foránea 'receipt_id' se rellene correctamente.
+     */
     @AfterMapping
     default void linkDetails(@MappingTarget ReceiptEntity entity) {
         if (entity.getDetails() != null) {

@@ -20,7 +20,7 @@ import lombok.Setter;
 public class InvoiceReplicaEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long factId;
+    private Long id;
 
     @Column(name = "fact_code", nullable = false)
     private Long factCode;

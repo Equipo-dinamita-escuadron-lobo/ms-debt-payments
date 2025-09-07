@@ -1,7 +1,5 @@
 package debt_payments.infraestructure.output.jpa.entity;
 
-import java.math.BigDecimal;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -27,8 +25,11 @@ public class ReceiptDetailEntity {
     @Column(name = "invoice_id", nullable = false)
     private Long invoiceId;
 
+    @Column(name = "invoice_code")
+    private String invoiceCode;
+
     @Column(name = "amount_paid", nullable = false)
-    private BigDecimal amountPaid;
+    private Long amountPaid;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "receipt_id", nullable = false)

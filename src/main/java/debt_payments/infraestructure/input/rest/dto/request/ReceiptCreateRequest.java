@@ -25,6 +25,8 @@ public class ReceiptCreateRequest {
 
     private Long ledgerAccountId;
 
+    private String enterpriseId;
+
     @Valid
     @NotEmpty(message = "Receipt details cannot be empty for an invoice payment")
     private List<ReceiptDetailRequest> details;
