@@ -69,11 +69,11 @@ public class InvoicePersistenceAdapter implements IInvoiceProviderPort {
     @Override
     @Transactional
     public void updateInvoice(InvoiceReplica invoice) {
-        InvoiceReplicaEntity obj = invoiceRepository.getReferenceById(invoice.getId());
-        obj.setPendingValue(invoice.getPendingValue());
-        obj.setTotalPay(invoice.getTotalPay());
-        obj.setTotalValue(invoice.getTotalValue());
-        invoiceRepository.save(obj);
+        InvoiceReplicaEntity invoiceToUpdate = invoiceRepository.getReferenceById(invoice.getId());
+        invoiceToUpdate.setPendingValue(invoice.getPendingValue());
+        invoiceToUpdate.setTotalPay(invoice.getTotalPay());
+        invoiceToUpdate.setTotalValue(invoice.getTotalValue());
+        invoiceRepository.save(invoiceToUpdate);
     }
 
 }

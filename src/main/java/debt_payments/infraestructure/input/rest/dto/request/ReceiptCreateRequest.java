@@ -3,7 +3,6 @@ package debt_payments.infraestructure.input.rest.dto.request;
 import java.util.List;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,7 +26,8 @@ public class ReceiptCreateRequest {
 
     private String enterpriseId;
 
+    private Long totalAmount;
+
     @Valid
-    @NotEmpty(message = "Receipt details cannot be empty for an invoice payment")
     private List<ReceiptDetailRequest> details;
 }

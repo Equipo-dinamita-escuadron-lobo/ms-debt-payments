@@ -65,10 +65,18 @@ public class ReceiptService implements IReceiptCommandUseCase, IReceiptQueryUseC
                 // 5. Sumar al total del recibo
                 totalAmount += detail.getAmountPaid();
             }
+        }else{
+            totalAmount = receipt.getTotalAmount();
         }
 
         // 6. Completar y guardar el recibo
-        receipt.setTotalAmount(totalAmount);
+        //Para guardar monto total dependiendo del tipo de recibo
+        if(receipt.isInvoicePayment()){
+            receipt.setTotalAmount(totalAmount);
+        }else{
+            receipt.setTotalAmount(receipt.getTotalAmount());
+        }
+        
         receipt.setReceiptCode(generateUniqueReceiptCode());
         receipt.setIssueDate(LocalDate.now());
         receipt.setStatus(ReceiptStatus.FINALIZED);

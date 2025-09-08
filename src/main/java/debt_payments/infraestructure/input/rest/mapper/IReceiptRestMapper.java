@@ -21,7 +21,7 @@ public interface IReceiptRestMapper {
     @Mapping(target = "receiptCode", ignore = true)
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "issueDate", ignore = true)
-    @Mapping(target = "totalAmount", ignore = true) 
+    //@Mapping(target = "totalAmount", ignore = true) 
     @Mapping(target = "voidReasonDescription", ignore = true)
     @Mapping(target = "voidDate", ignore = true)
     Receipt toDomain(ReceiptCreateRequest request);
