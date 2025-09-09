@@ -13,5 +13,6 @@ public class ReceiptDetail {
     private Long id;
     private Long invoiceId;  
     private String invoiceCode;         
-    private Long amountPaid;    
+    private Long amountPaid;   
+    private Long accountingAccount;
 }

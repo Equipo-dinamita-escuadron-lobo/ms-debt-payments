@@ -61,6 +61,8 @@ public class ReceiptService implements IReceiptCommandUseCase, IReceiptQueryUseC
 
                 // 4. Guardar el código de la factura en el detalle (Tu petición)
                 detail.setInvoiceCode(invoice.getFactCode());
+                detail.setAccountingAccount(invoice.getAccountingAccount());
+                
                 
                 // 5. Sumar al total del recibo
                 totalAmount += detail.getAmountPaid();

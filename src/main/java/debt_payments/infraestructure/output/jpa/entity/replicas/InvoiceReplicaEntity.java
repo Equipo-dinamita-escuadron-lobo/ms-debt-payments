@@ -48,4 +48,7 @@ public class InvoiceReplicaEntity {
 
     @Column(name = "active", nullable = false)
     private boolean active;
+
+    @Column(name = "accounting_account", nullable = false)
+    private Long accountingAccount;
 }

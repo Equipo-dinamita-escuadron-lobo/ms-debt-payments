@@ -28,6 +28,9 @@ public class ReceiptDetailEntity {
     @Column(name = "invoice_code")
     private String invoiceCode;
 
+    @Column(name = "accounting_account", nullable = false)
+    private Long accountingAccount;
+
     @Column(name = "amount_paid", nullable = false)
     private Long amountPaid;
 

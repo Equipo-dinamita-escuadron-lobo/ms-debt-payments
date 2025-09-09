@@ -15,4 +15,5 @@ public class InvoiceReplica {
     private Long totalValue;
     private Long totalPay;
     private Long pendingValue;
+    private Long accountingAccount;
 }
