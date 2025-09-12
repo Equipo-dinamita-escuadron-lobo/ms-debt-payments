@@ -1,6 +1,7 @@
 package debt_payments.infraestructure.output.messageBroker.adapter;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Component;
@@ -56,7 +57,7 @@ public class InvoicePersistenceAdapter implements IInvoiceProviderPort {
      * @return Un Optional que contiene el objeto de dominio InvoiceReplica si se encuentra,
      *         o un Optional vacío si no.
      */
-    @Transactional(readOnly = true) // Es una operación de solo lectura
+    //@Transactional(readOnly = true) // Es una operación de solo lectura
     @Override
     public Optional<InvoiceReplica> findInvoiceById(Long invoiceId) {
         Optional<InvoiceReplicaEntity> entityOptional = invoiceRepository.findById(invoiceId);
@@ -68,13 +69,18 @@ public class InvoicePersistenceAdapter implements IInvoiceProviderPort {
      * @param invoice El objeto de dominio InvoiceReplica con los datos actualizados.
      */
     @Override
-    @Transactional
     public void updateInvoice(InvoiceReplica invoice) {
         InvoiceReplicaEntity invoiceToUpdate = invoiceRepository.getReferenceById(invoice.getId());
         invoiceToUpdate.setPendingValue(invoice.getPendingValue());
         invoiceToUpdate.setTotalPay(invoice.getTotalPay());
         invoiceToUpdate.setTotalValue(invoice.getTotalValue());
         invoiceRepository.save(invoiceToUpdate);
+    }
+
+    @Override
+    public List<InvoiceReplica> findPendingInvoicesByClientId(Long clientId) {
+        var invoiceEntityList = invoiceRepository.findByThirdIdAndPendingValueGreaterThan(clientId, 0L);
+        return invoiceMapper.toInvoiceReplicaList(invoiceEntityList);
     }
 
 }

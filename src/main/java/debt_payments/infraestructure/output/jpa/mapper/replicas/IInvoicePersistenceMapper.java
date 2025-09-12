@@ -1,5 +1,7 @@
 package debt_payments.infraestructure.output.jpa.mapper.replicas;
 
+import java.util.List;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 
@@ -22,4 +24,11 @@ public interface IInvoicePersistenceMapper {
      */
     
     InvoiceReplicaEntity toEntity(InvoiceReplica domain);
+
+    /**
+     * Convierte una lista de entidades JPA a una lista de objetos de dominio.
+     * @param invoiceEntityList La lista de entidades JPA a convertir.
+     * @return La lista de objetos de dominio resultante.
+     */
+    List<InvoiceReplica> toInvoiceReplicaList(List<InvoiceReplicaEntity> invoiceEntityList);
 }

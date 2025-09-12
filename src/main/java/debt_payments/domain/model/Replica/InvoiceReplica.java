@@ -1,5 +1,7 @@
 package debt_payments.domain.model.Replica;
 
+import java.time.LocalDate;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,6 +16,8 @@ public class InvoiceReplica {
     private String factCode; 
     private Long totalValue;
     private Long totalPay;
+    private Long thirdId;
     private Long pendingValue;
     private Long accountingAccount;
+    private LocalDate expirationDate;
 }

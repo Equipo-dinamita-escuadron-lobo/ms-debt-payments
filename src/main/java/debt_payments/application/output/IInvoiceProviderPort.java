@@ -1,5 +1,6 @@
 package debt_payments.application.output;
 
+import java.util.List;
 import java.util.Optional;
 
 import debt_payments.domain.model.Replica.InvoiceReplica;
@@ -20,4 +21,12 @@ public interface IInvoiceProviderPort {
      * @param invoice El objeto de dominio InvoiceReplica con los datos actualizados.
      */
     void updateInvoice(InvoiceReplica invoice);
+
+    /**
+     * Obtiene una lista de facturas con saldo pendiente para un cliente específico.
+     *
+     * @param clientId El ID del cliente.
+     * @return Lista de modelos de dominio de InvoiceReplica.
+     */
+    List<InvoiceReplica> findPendingInvoicesByClientId(Long clientId);
 }
