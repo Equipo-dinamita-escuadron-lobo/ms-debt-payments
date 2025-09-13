@@ -10,4 +10,6 @@ import lombok.Setter;
 public class ReceiptDetailResponse {
     private Long invoiceId;           
     private BigDecimal amountPaid;   
+    private String invoiceCode; 
+    private Long accountingAccount;
 }

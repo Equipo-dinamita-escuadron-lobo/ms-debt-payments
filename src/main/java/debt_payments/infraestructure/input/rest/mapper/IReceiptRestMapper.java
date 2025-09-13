@@ -21,7 +21,6 @@ public interface IReceiptRestMapper {
     @Mapping(target = "receiptCode", ignore = true)
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "issueDate", ignore = true)
-    //@Mapping(target = "totalAmount", ignore = true) 
     @Mapping(target = "voidReasonDescription", ignore = true)
     @Mapping(target = "voidDate", ignore = true)
     Receipt toDomain(ReceiptCreateRequest request);
@@ -31,6 +30,8 @@ public interface IReceiptRestMapper {
 
     //Mapeo de Dominio a DTO
     @Mapping(source = "status", target = "status")
+    @Mapping(source = "paymentMethodId", target = "paymentMethodId")
+    @Mapping(source = "issueDate", target = "issueDate")
     ReceiptResponse toResponse(Receipt receipt);
 
     List<ReceiptResponse> toResponseList(List<Receipt> receipts);
