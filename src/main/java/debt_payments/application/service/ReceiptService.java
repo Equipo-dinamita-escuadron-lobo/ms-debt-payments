@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import debt_payments.application.input.IAccountingEventPublisher;
 import debt_payments.application.input.IInvoiceQueryUseCase;
 import debt_payments.application.input.IReceiptCommandUseCase;
 import debt_payments.application.input.IReceiptQueryUseCase;
@@ -19,6 +20,8 @@ import debt_payments.domain.model.Receipt;
 import debt_payments.domain.model.ReceiptDetail;
 import debt_payments.domain.model.ReceiptStatus;
 import debt_payments.domain.model.Replica.InvoiceReplica;
+import debt_payments.infraestructure.input.rest.dto.response.ReceiptResponse;
+import debt_payments.infraestructure.input.rest.mapper.IReceiptRestMapper;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -28,6 +31,9 @@ public class ReceiptService implements IReceiptCommandUseCase, IReceiptQueryUseC
     private final IReceiptCommandPersistencePort receiptCommandPersistencePort;
     private final IReceiptQueryPersistencePort receiptQueryPersistencePort;
     private final IInvoiceProviderPort invoiceProviderPort;
+
+    private final IAccountingEventPublisher accountingEventPublisher;
+    private final IReceiptRestMapper receiptRestMapper;
 
     /**
      * Creates a new receipt after validating external dependencies and generating a unique receipt code.
@@ -87,6 +93,10 @@ public class ReceiptService implements IReceiptCommandUseCase, IReceiptQueryUseC
 
         Receipt savedReceipt = receiptCommandPersistencePort.save(receipt);
 
+        //Lineas para publicar el evento de creación
+        ReceiptResponse receiptResponse = receiptRestMapper.toResponse(savedReceipt);
+        accountingEventPublisher.publishReceiptCreatedEvent(receiptResponse);
+
         return savedReceipt;
     }
 
@@ -117,7 +127,13 @@ public class ReceiptService implements IReceiptCommandUseCase, IReceiptQueryUseC
         receiptToVoid.setVoidReasonDescription(reasonDescription);
         receiptToVoid.setVoidDate(LocalDate.now());
 
-        return receiptCommandPersistencePort.save(receiptToVoid);
+        Receipt voidedReceipt = receiptCommandPersistencePort.save(receiptToVoid);
+
+        //Lineas para publicar el evento de anulación
+        ReceiptResponse receiptResponse = receiptRestMapper.toResponse(voidedReceipt);
+        accountingEventPublisher.publishVoidReceiptEvent(receiptResponse);
+
+        return voidedReceipt;
     }
 
     @Override
