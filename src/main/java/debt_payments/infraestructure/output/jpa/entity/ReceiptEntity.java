@@ -42,7 +42,10 @@ public class ReceiptEntity {
     @Column(name = "payment_method_id", nullable = false)
     private Long paymentMethodId;
 
-    @Column(name = "receipt_type_id", nullable = false)
+    @Column(name = "payment_method_account", nullable = false)
+    private Long paymentMethodAccount;
+
+    @Column(name = "receipt_type", nullable = false)
     private Long receiptTypeId;
 
     @Enumerated(EnumType.STRING)
@@ -64,7 +67,7 @@ public class ReceiptEntity {
     @Column(name = "void_date")      
     private LocalDateTime voidDate;
 
-    @Column(name = "ledger_account_id")
+    @Column(name = "ledger_account")
     private Long ledgerAccountId;
 
     @OneToMany(mappedBy = "receipt", cascade = CascadeType.ALL, orphanRemoval = true)

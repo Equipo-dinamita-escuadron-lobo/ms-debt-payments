@@ -18,6 +18,7 @@ public class Receipt {
     private String enterpriseId;
     private Long thirdPartyId;
     private Long paymentMethodId;
+    private Long paymentMethodAccount;
     private Long receiptTypeId;
     private ReceiptStatus status;
     private LocalDate issueDate;

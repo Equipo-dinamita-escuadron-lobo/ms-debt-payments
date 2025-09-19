@@ -17,6 +17,9 @@ public class ReceiptCreateRequest {
     @NotNull(message = "Payment method ID cannot be null")
     private Long paymentMethodId;
 
+    @NotNull(message = "Payment method account cannot be null")
+    private Long paymentMethodAccount;
+
     @NotNull(message = "Receipt type ID cannot be null")
     private Long receiptTypeId;
 

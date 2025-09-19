@@ -14,6 +14,7 @@ public class ReceiptResponse {
     private String receiptCode;
     private Long thirdPartyId;
     private Long paymentMethodId;
+    private Long paymentMethodAccount; // Añadido para la cuenta del método de pago
     private String enterpriseId;  // Añadido para identificar la empresa
     private Long receiptTypeId;   // Añadido para identificar el tipo de recibo
     private String status; 
