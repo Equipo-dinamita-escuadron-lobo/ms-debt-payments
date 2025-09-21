@@ -1,8 +1,8 @@
 package debt_payments.infraestructure.output.messageBroker.listener;
 
-import java.io.IOException;
 import com.rabbitmq.client.Channel;
 
+import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.messaging.handler.annotation.Header;
@@ -36,9 +36,9 @@ public class InvoiceEventListener extends AbstractMessageListener<EventDto<Invoi
 
     @RabbitListener(queues = RabbitConfig.INVOICE_PAYMENTS_QUEUE, containerFactory = "rabbitListenerContainerFactory")
     public void handleInvoiceEvent(
+            Message message,
             EventDto<InvoiceSyncDto> event, Channel channel,
-            @Header(AmqpHeaders.DELIVERY_TAG) long tag,
-            @Header("x-tenant-id") String tenantId) throws IOException {
+            @Header(AmqpHeaders.DELIVERY_TAG) long tag) {
         log.info("Received event type '{}' for invoice with ID: {}",
                 event.getType(),
                 event.getData() != null ? event.getData().getFactCode() : "NA");

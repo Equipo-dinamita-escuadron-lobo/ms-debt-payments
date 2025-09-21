@@ -1,5 +1,7 @@
 package debt_payments.infraestructure.output.jpa.entity;
 
+import org.hibernate.annotations.TenantId;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -37,5 +39,8 @@ public class ReceiptDetailEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "receipt_id", nullable = false)
     private ReceiptEntity receipt;
+
+    @TenantId
+    String tenantId;
 
 }

@@ -6,6 +6,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.annotations.TenantId;
+
 import debt_payments.domain.model.ReceiptStatus;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -72,4 +74,7 @@ public class ReceiptEntity {
 
     @OneToMany(mappedBy = "receipt", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ReceiptDetailEntity> details = new ArrayList<>();
+
+    @TenantId
+    String tenantId;
 }

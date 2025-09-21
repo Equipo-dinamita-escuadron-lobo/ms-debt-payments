@@ -2,6 +2,7 @@ package debt_payments.infraestructure.output.jpa.entity.replicas;
 
 import java.time.LocalDate;
 
+import org.hibernate.annotations.TenantId;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.Column;
@@ -51,4 +52,7 @@ public class InvoiceReplicaEntity {
 
     @Column(name = "accounting_account", nullable = false)
     private Long accountingAccount;
+
+    @TenantId
+    String tenantId;
 }
