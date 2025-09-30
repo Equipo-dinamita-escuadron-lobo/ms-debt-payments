@@ -27,8 +27,9 @@ public class Receipt {
     private String voidReasonDescription;
     private LocalDate voidDate;
 
-    private Long ledgerAccountId; //Accounting Account ID (for Direct Entry)
-    private List<ReceiptDetail> details; // Receipt Details (Credits)
+    private Long ledgerAccountId; 
+    private Long centerCostId;
+    private List<ReceiptDetail> details;
 
     public boolean isInvoicePayment() {
         // Assuming ID 1 corresponds to "Invoice Payment"

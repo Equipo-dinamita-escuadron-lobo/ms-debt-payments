@@ -27,6 +27,8 @@ public class ReceiptCreateRequest {
 
     private Long ledgerAccountId;
 
+    private Long centerCostId;
+
     private String enterpriseId;
 
     private Long totalAmount;

@@ -72,6 +72,9 @@ public class ReceiptEntity {
     @Column(name = "ledger_account")
     private Long ledgerAccountId;
 
+    @Column(name = "center_cost")
+    private Long centerCostId;
+
     @OneToMany(mappedBy = "receipt", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ReceiptDetailEntity> details = new ArrayList<>();
 

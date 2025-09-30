@@ -34,16 +34,6 @@ public class ReceiptPersistenceAdapter implements IReceiptCommandPersistencePort
     public Receipt save(Receipt receipt) {
         ReceiptEntity receiptEntity = receiptMapper.toEntity(receipt);
 
-        // LÓGICA DE MULTITENANCY
-        // Si la entidad es nueva (no tiene ID), se le asigna el tenant actual.
-        /*if (receiptEntity.getId() == null) {
-            String currentTenant = TenantContext.getCurrentTenant();
-            if (currentTenant == null || currentTenant.isBlank()) {
-                throw new IllegalStateException("Tenant context is not set. Cannot save receipt.");
-            }
-            receiptEntity.setEnterpriseId(currentTenant);
-        }*/
-
         ReceiptEntity savedEntity = receiptRepository.save(receiptEntity);
         return receiptMapper.toDomain(savedEntity);
     }
