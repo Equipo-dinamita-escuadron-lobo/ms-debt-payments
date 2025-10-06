@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import debt_payments.application.output.IInvoiceProviderPort;
+import debt_payments.domain.enums.InvoiceStatus;
 import debt_payments.domain.model.Replica.InvoiceReplica;
 import debt_payments.infraestructure.output.jpa.entity.replicas.InvoiceReplicaEntity;
 import debt_payments.infraestructure.output.jpa.mapper.replicas.IInvoicePersistenceMapper;
@@ -36,6 +37,7 @@ public class InvoicePersistenceAdapter implements IInvoiceProviderPort {
         entity.setExpirationDate(dto.getExpirationDate());
         entity.setLastUpdateAt(LocalDate.now());
         entity.setActive(true); 
+        entity.setStatus(InvoiceStatus.PENDING);
         entity.setAccountingAccount(dto.getAccountingAccount());
         invoiceRepository.save(entity);
     }
@@ -74,12 +76,19 @@ public class InvoicePersistenceAdapter implements IInvoiceProviderPort {
         invoiceToUpdate.setPendingValue(invoice.getPendingValue());
         invoiceToUpdate.setTotalPay(invoice.getTotalPay());
         invoiceToUpdate.setTotalValue(invoice.getTotalValue());
+        invoiceToUpdate.setStatus(invoice.getStatus()); //Nuevo campo estado
         invoiceRepository.save(invoiceToUpdate);
     }
 
     @Override
     public List<InvoiceReplica> findPendingInvoicesByClientId(Long clientId) {
         var invoiceEntityList = invoiceRepository.findByThirdIdAndPendingValueGreaterThan(clientId, 0L);
+        return invoiceMapper.toInvoiceReplicaList(invoiceEntityList);
+    }
+
+    @Override
+    public List<InvoiceReplica> findInvoicesByIds(List<Long> invoiceIds) {
+        var invoiceEntityList = invoiceRepository.findAllById(invoiceIds);
         return invoiceMapper.toInvoiceReplicaList(invoiceEntityList);
     }
 

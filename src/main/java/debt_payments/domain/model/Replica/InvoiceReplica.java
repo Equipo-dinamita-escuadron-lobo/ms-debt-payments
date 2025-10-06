@@ -2,6 +2,7 @@ package debt_payments.domain.model.Replica;
 
 import java.time.LocalDate;
 
+import debt_payments.domain.enums.InvoiceStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,4 +21,22 @@ public class InvoiceReplica {
     private Long pendingValue;
     private Long accountingAccount;
     private LocalDate expirationDate;
+    private String entId;
+    private InvoiceStatus status;
+    private boolean active;
+
+
+    /**
+     * Lógica de negocio para castigar la cartera.
+     */
+    public void writeOff() {
+        if (this.status == InvoiceStatus.PAID) 
+            throw new IllegalStateException("Cannot write off a fully paid invoice. FactCode: " + this.factCode);
+
+        if (this.status == InvoiceStatus.WRITTEN_OFF) 
+            return;
+        
+        this.status = InvoiceStatus.WRITTEN_OFF;
+        this.pendingValue = 0L;
+    }
 }

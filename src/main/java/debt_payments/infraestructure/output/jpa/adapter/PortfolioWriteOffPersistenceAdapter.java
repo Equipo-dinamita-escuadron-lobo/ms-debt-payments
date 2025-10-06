@@ -1,0 +1,53 @@
+package debt_payments.infraestructure.output.jpa.adapter;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.stereotype.Component;
+
+import debt_payments.application.output.IPortfolioWriteOffPersistencePort;
+import debt_payments.domain.model.PortfolioWriteOff;
+import debt_payments.infraestructure.output.jpa.entity.PortfolioWriteOffEntity;
+import debt_payments.infraestructure.output.jpa.mapper.IPortfolioWriteOffPersistenceMapper;
+import debt_payments.infraestructure.output.jpa.repository.IPortfolioWriteOffRepository;
+import lombok.RequiredArgsConstructor;
+
+@Component
+@RequiredArgsConstructor
+public class PortfolioWriteOffPersistenceAdapter implements IPortfolioWriteOffPersistencePort {
+
+    private final IPortfolioWriteOffRepository portfolioWriteOffRepository;
+    private final IPortfolioWriteOffPersistenceMapper portfolioWriteOffMapper;
+
+    @Override
+    public PortfolioWriteOff save(PortfolioWriteOff writeOff) {
+        PortfolioWriteOffEntity entityToSave = portfolioWriteOffMapper.toEntity(writeOff);
+        entityToSave.getDetails().forEach(detail -> detail.setPortfolioWriteOff(entityToSave));
+        PortfolioWriteOffEntity savedEntity = portfolioWriteOffRepository.save(entityToSave);
+        return portfolioWriteOffMapper.toDomain(savedEntity);
+    }
+
+    @Override
+    public Optional<PortfolioWriteOff> findById(Long writeOffId) {
+        return portfolioWriteOffRepository.findById(writeOffId)
+                .map(portfolioWriteOffMapper::toDomain);
+    }
+
+    @Override
+    public PortfolioWriteOff update(PortfolioWriteOff writeOff) {
+        if (writeOff.getId() == null || !portfolioWriteOffRepository.existsById(writeOff.getId())) {
+            throw new IllegalArgumentException("El castigo con ID " + writeOff.getId() + " no existe.");
+        }
+        PortfolioWriteOffEntity entityToUpdate = portfolioWriteOffMapper.toEntity(writeOff);
+        entityToUpdate.getDetails().forEach(detail -> detail.setPortfolioWriteOff(entityToUpdate));
+        PortfolioWriteOffEntity updatedEntity = portfolioWriteOffRepository.save(entityToUpdate);
+        return portfolioWriteOffMapper.toDomain(updatedEntity);
+    }
+
+    @Override
+    public List<PortfolioWriteOff> findByEnterpriseId(String enterpriseId) {
+        List<PortfolioWriteOffEntity> entities = portfolioWriteOffRepository.findByEnterpriseId(enterpriseId);
+        return portfolioWriteOffMapper.toDomainList(entities);
+    }
+    
+}

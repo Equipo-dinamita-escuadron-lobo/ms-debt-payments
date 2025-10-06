@@ -5,8 +5,11 @@ import java.time.LocalDate;
 import org.hibernate.annotations.TenantId;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import debt_payments.domain.enums.InvoiceStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -52,6 +55,10 @@ public class InvoiceReplicaEntity {
 
     @Column(name = "accounting_account", nullable = false)
     private Long accountingAccount;
+
+    @Enumerated(EnumType.STRING) 
+    @Column(name = "status", nullable = false)
+    private InvoiceStatus status;
 
     @TenantId
     String tenantId;

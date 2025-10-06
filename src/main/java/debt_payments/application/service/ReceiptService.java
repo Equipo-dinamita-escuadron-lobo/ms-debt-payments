@@ -42,9 +42,8 @@ public class ReceiptService implements IReceiptCommandUseCase, IReceiptQueryUseC
      */
     @Override
     public Receipt createReceipt(Receipt receipt) {
-        // validateThirdParty(receipt.getThirdPartyId()); // Validar tercero (desactivado temporalmente)
 
-        Long totalAmount = 0L; // Inicializar total con Long
+        Long totalAmount = 0L; 
 
         if (receipt.isInvoicePayment()) {
             if (receipt.getDetails() == null || receipt.getDetails().isEmpty()) {
@@ -66,7 +65,7 @@ public class ReceiptService implements IReceiptCommandUseCase, IReceiptQueryUseC
                 invoice.setTotalPay(invoice.getTotalPay() + detail.getAmountPaid());
                 invoiceProviderPort.updateInvoice(invoice);
 
-                // 4. Guardar el código de la factura en el detalle (Tu petición)
+                // 4. Guardar el código de la factura en el detalle 
                 detail.setInvoiceCode(invoice.getFactCode());
                 detail.setAccountingAccount(invoice.getAccountingAccount());
                 
