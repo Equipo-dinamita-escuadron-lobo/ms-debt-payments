@@ -28,6 +28,9 @@ public class CreateWriteOffRequest {
 
     @NotNull(message = "Debit auxiliary account is required.")
     private Long debitAuxiliaryAccount;
+
+    @NotNull(message = "Debit auxiliary account ID is required.")
+    private Long debitAuxiliaryAccountId;
     
     @NotBlank(message = "Enterprise ID is required.")
     private String enterpriseId;

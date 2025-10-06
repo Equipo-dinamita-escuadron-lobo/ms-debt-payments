@@ -33,11 +33,17 @@ public class PortfolioWriteOffEntity {
     @Column(nullable = false, length = 500)
     private String justification;
 
+    @Column(name = "total_amount", nullable = false)
+    private Long totalAmount;
+
     @Column(name = "write_off_date", nullable = false)
     private LocalDate writeOffDate;
 
     @Column(name = "debit_auxiliary_account", nullable = false)
     private Long debitAuxiliaryAccount;
+
+    @Column(name = "debit_auxiliary_account_id", nullable = false)
+    private Long debitAuxiliaryAccountId;
 
     @Enumerated(EnumType.STRING) // Guarda el estado como texto (e.g., "CONFIRMED")
     @Column(nullable = false)

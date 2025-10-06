@@ -36,6 +36,8 @@ public class PortfolioWriteOffService implements IPortfolioWriteOffCommandUseCas
 
     @Override
     public PortfolioWriteOff createWriteOff(CreateWriteOffRequest request) {
+
+        Long totalAmount = 0L;
         // 1. Validar que las facturas existen y obtener sus saldos
         List<Long> invoiceIds = request.getDetails().stream()
                 .map(WriteOffDetailRequest::getInvoiceId)
@@ -50,6 +52,12 @@ public class PortfolioWriteOffService implements IPortfolioWriteOffCommandUseCas
         Map<Long, InvoiceReplica> invoiceMap = foundInvoices.stream()
                 .collect(Collectors.toMap(InvoiceReplica::getId, Function.identity()));
 
+        // Calcular el monto total a castigar
+        for (WriteOffDetailRequest detailRequest : request.getDetails()) {
+            InvoiceReplica invoice = invoiceMap.get(detailRequest.getInvoiceId());
+            totalAmount += invoice.getPendingValue(); // Sumamos el saldo pendiente ACTUAL
+        }
+
         // 2. Construir el objeto de dominio a partir del DTO
         List<WriteOffDetail> details = new ArrayList<>();
         for (WriteOffDetailRequest detailRequest : request.getDetails()) {
@@ -62,8 +70,10 @@ public class PortfolioWriteOffService implements IPortfolioWriteOffCommandUseCas
 
         PortfolioWriteOff newWriteOff = PortfolioWriteOff.builder()
                 .justification(request.getJustification())
+                .totalAmount(totalAmount)
                 .writeOffDate(request.getWriteOffDate())
                 .debitAuxiliaryAccount(request.getDebitAuxiliaryAccount())
+                .debitAuxiliaryAccountId(request.getDebitAuxiliaryAccountId())
                 .enterpriseId(request.getEnterpriseId()) // Asumiendo que viene en el request
                 .status(WriteOffStatus.PENDING_CONFIRMATION)
                 .details(details)
@@ -218,8 +228,10 @@ public class PortfolioWriteOffService implements IPortfolioWriteOffCommandUseCas
         return PortfolioWriteOffResponse.builder()
             .id(writeOff.getId())
             .justification(writeOff.getJustification())
+            .totalAmount(writeOff.getTotalAmount())
             .writeOffDate(writeOff.getWriteOffDate())
             .debitAuxiliaryAccount(writeOff.getDebitAuxiliaryAccount())
+            .debitAuxiliaryAccountId(writeOff.getDebitAuxiliaryAccountId())
             .status(writeOff.getStatus())
             .enterpriseId(writeOff.getEnterpriseId())
             .details(detailResponses)
