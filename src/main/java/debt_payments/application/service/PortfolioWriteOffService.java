@@ -69,12 +69,14 @@ public class PortfolioWriteOffService implements IPortfolioWriteOffCommandUseCas
         }
 
         PortfolioWriteOff newWriteOff = PortfolioWriteOff.builder()
+                .code(generateUniqueWriteOffCode())
                 .justification(request.getJustification())
                 .totalAmount(totalAmount)
                 .writeOffDate(request.getWriteOffDate())
                 .debitAuxiliaryAccount(request.getDebitAuxiliaryAccount())
                 .debitAuxiliaryAccountId(request.getDebitAuxiliaryAccountId())
-                .enterpriseId(request.getEnterpriseId()) // Asumiendo que viene en el request
+                .thirdId(request.getThirdId())
+                .enterpriseId(request.getEnterpriseId()) 
                 .status(WriteOffStatus.PENDING_CONFIRMATION)
                 .details(details)
                 .build();
@@ -227,14 +229,20 @@ public class PortfolioWriteOffService implements IPortfolioWriteOffCommandUseCas
         // 4. Construir y devolver el DTO de respuesta final
         return PortfolioWriteOffResponse.builder()
             .id(writeOff.getId())
+            .code(writeOff.getCode())
             .justification(writeOff.getJustification())
             .totalAmount(writeOff.getTotalAmount())
             .writeOffDate(writeOff.getWriteOffDate())
             .debitAuxiliaryAccount(writeOff.getDebitAuxiliaryAccount())
             .debitAuxiliaryAccountId(writeOff.getDebitAuxiliaryAccountId())
+            .thirdId(writeOff.getThirdId())
             .status(writeOff.getStatus())
             .enterpriseId(writeOff.getEnterpriseId())
             .details(detailResponses)
             .build();
+    }
+
+    private String generateUniqueWriteOffCode() {
+        return "CC-" + System.currentTimeMillis();
     }
 }

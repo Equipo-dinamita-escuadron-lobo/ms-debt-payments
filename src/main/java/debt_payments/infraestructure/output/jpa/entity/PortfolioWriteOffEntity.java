@@ -33,6 +33,9 @@ public class PortfolioWriteOffEntity {
     @Column(nullable = false, length = 500)
     private String justification;
 
+    @Column(nullable = false, length = 100)
+    private String code;
+
     @Column(name = "total_amount", nullable = false)
     private Long totalAmount;
 
@@ -44,6 +47,9 @@ public class PortfolioWriteOffEntity {
 
     @Column(name = "debit_auxiliary_account_id", nullable = false)
     private Long debitAuxiliaryAccountId;
+
+    @Column(name = "third_id", nullable = false)
+    private Long thirdId;
 
     @Enumerated(EnumType.STRING) // Guarda el estado como texto (e.g., "CONFIRMED")
     @Column(nullable = false)
