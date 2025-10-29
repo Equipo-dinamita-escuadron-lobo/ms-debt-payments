@@ -34,6 +34,7 @@ public class InvoicePersistenceAdapter implements IInvoiceProviderPort {
         entity.setTotalValue(dto.getTotalValue());
         entity.setTotalPay(dto.getTotalPay());
         entity.setPendingValue(dto.getPendingValue());
+        entity.setCreationDate(dto.getCreationDate());
         entity.setExpirationDate(dto.getExpirationDate());
         entity.setLastUpdateAt(LocalDate.now());
         entity.setActive(true); 

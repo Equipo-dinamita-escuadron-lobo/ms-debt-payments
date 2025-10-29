@@ -13,5 +13,6 @@ public class InvoicePendingResponse {
     private Long pendingValue;
     private Long thirdId;
     private Long totalValue;
+    private LocalDate creationDate;
     private LocalDate expirationDate;
 }

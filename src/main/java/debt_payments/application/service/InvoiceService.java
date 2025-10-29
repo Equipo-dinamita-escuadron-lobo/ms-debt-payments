@@ -53,6 +53,8 @@ public class InvoiceService implements IInvoiceCommandUseCase, IInvoiceQueryUseC
 
         invoice.setExpirationDate(newDueDate);
 
+        invoice.validateDates();
+
         invoiceProviderPort.updateInvoice(invoice);
     }
 

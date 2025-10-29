@@ -19,6 +19,7 @@ public class InvoiceSyncDto {
     private Long totalValue;
     private Long totalPay;
     private Long pendingValue;
+    private LocalDate creationDate;
     private LocalDate expirationDate;
     private boolean active;
     private Long accountingAccount;
