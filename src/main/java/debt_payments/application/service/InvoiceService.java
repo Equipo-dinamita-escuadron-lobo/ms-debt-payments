@@ -1,18 +1,21 @@
 package debt_payments.application.service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
 import debt_payments.application.input.IInvoiceCommandUseCase;
+import debt_payments.application.input.IInvoiceQueryUseCase;
 import debt_payments.application.output.IInvoiceProviderPort;
+import debt_payments.domain.enums.InvoiceStatus;
 import debt_payments.domain.exception.InvoiceNotFoundException;
 import debt_payments.domain.model.Replica.InvoiceReplica;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class InvoiceService implements IInvoiceCommandUseCase {
+public class InvoiceService implements IInvoiceCommandUseCase, IInvoiceQueryUseCase {
 
     private final IInvoiceProviderPort invoiceProviderPort;
 
@@ -39,5 +42,27 @@ public class InvoiceService implements IInvoiceCommandUseCase {
             invoiceProviderPort.updateInvoice(invoice);
         }
     }
-    
+
+    @Override
+    public void updateDueDate(Long invoiceId, LocalDate newDueDate) {
+        InvoiceReplica invoice = invoiceProviderPort.findInvoiceById(invoiceId)
+                .orElseThrow(() -> new InvoiceNotFoundException("No se encontró la factura con ID: " + invoiceId));
+
+        if (invoice.getStatus() == InvoiceStatus.PAID) 
+            throw new IllegalStateException("No se puede cambiar la fecha de vencimiento de una factura ya pagada.");
+
+        invoice.setExpirationDate(newDueDate);
+
+        invoiceProviderPort.updateInvoice(invoice);
+    }
+
+    @Override
+    public List<InvoiceReplica> findPendingInvoicesByClientId(Long clientId) {
+        return invoiceProviderPort.findPendingInvoicesByClientId(clientId);
+    }
+
+    @Override
+    public List<InvoiceReplica> findInvoicesByEnterpriseId(String enterpriseId) {
+        return invoiceProviderPort.findInvoicesByEnterpriseId(enterpriseId);
+    }
 }

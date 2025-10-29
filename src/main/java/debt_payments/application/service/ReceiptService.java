@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import debt_payments.application.input.IAccountingEventPublisher;
-import debt_payments.application.input.IInvoiceQueryUseCase;
 import debt_payments.application.input.IReceiptCommandUseCase;
 import debt_payments.application.input.IReceiptQueryUseCase;
 import debt_payments.application.output.IInvoiceProviderPort;
@@ -26,7 +25,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class ReceiptService implements IReceiptCommandUseCase, IReceiptQueryUseCase, IInvoiceQueryUseCase  {
+public class ReceiptService implements IReceiptCommandUseCase, IReceiptQueryUseCase  {
 
     private final IReceiptCommandPersistencePort receiptCommandPersistencePort;
     private final IReceiptQueryPersistencePort receiptQueryPersistencePort;
@@ -164,10 +163,4 @@ public class ReceiptService implements IReceiptCommandUseCase, IReceiptQueryUseC
         // Por ahora, un timestamp es suficiente para la demostración.
         return "RC-" + System.currentTimeMillis();
     }
-
-    @Override
-    public List<InvoiceReplica> findPendingInvoicesByClientId(Long clientId) {
-        return invoiceProviderPort.findPendingInvoicesByClientId(clientId);
-    }
-
 }

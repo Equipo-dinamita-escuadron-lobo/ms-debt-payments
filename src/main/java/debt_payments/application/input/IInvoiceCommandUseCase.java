@@ -1,5 +1,6 @@
 package debt_payments.application.input;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface IInvoiceCommandUseCase {
@@ -11,4 +12,11 @@ public interface IInvoiceCommandUseCase {
      * @throws IllegalStateException si se intenta castigar una factura que ya ha sido pagada.
      */
     void writeOffInvoices(List<Long> invoiceIds);
+
+    /**
+     * Actualiza la fecha de vencimiento de una factura específica.
+     * @param invoiceId El ID de la factura a modificar (tipo Long, como en tu entidad).
+     * @param newDueDate La nueva fecha de vencimiento.
+     */
+    void updateDueDate(Long invoiceId, LocalDate newDueDate);
 }

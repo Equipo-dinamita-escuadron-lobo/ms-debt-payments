@@ -76,10 +76,16 @@ public class InvoicePersistenceAdapter implements IInvoiceProviderPort {
         invoiceToUpdate.setPendingValue(invoice.getPendingValue());
         invoiceToUpdate.setTotalPay(invoice.getTotalPay());
         invoiceToUpdate.setTotalValue(invoice.getTotalValue());
-        invoiceToUpdate.setStatus(invoice.getStatus()); //Nuevo campo estado
+        invoiceToUpdate.setStatus(invoice.getStatus()); 
+        invoiceToUpdate.setExpirationDate(invoice.getExpirationDate());
         invoiceRepository.save(invoiceToUpdate);
     }
 
+    /**
+     * Busca facturas pendientes por el ID del cliente.
+     * @param clientId El ID del cliente.
+     * @return Una lista de objetos de dominio InvoiceReplica que representan las facturas pendientes del cliente.
+     */
     @Override
     public List<InvoiceReplica> findPendingInvoicesByClientId(Long clientId) {
         var invoiceEntityList = invoiceRepository.findByThirdIdAndPendingValueGreaterThan(clientId, 0L);
@@ -89,6 +95,12 @@ public class InvoicePersistenceAdapter implements IInvoiceProviderPort {
     @Override
     public List<InvoiceReplica> findInvoicesByIds(List<Long> invoiceIds) {
         var invoiceEntityList = invoiceRepository.findAllById(invoiceIds);
+        return invoiceMapper.toInvoiceReplicaList(invoiceEntityList);
+    }
+
+    @Override
+    public List<InvoiceReplica> findInvoicesByEnterpriseId(String enterpriseId) {
+        var invoiceEntityList = invoiceRepository.findByEntIdAndStatus(enterpriseId, InvoiceStatus.PENDING);
         return invoiceMapper.toInvoiceReplicaList(invoiceEntityList);
     }
 
