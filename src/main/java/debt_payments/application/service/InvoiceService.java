@@ -67,4 +67,10 @@ public class InvoiceService implements IInvoiceCommandUseCase, IInvoiceQueryUseC
     public List<InvoiceReplica> findInvoicesByEnterpriseId(String enterpriseId) {
         return invoiceProviderPort.findInvoicesByEnterpriseId(enterpriseId);
     }
+
+    @Override
+    public InvoiceReplica findInvoiceById(Long invoiceId) {
+        return invoiceProviderPort.findInvoiceById(invoiceId)
+                .orElseThrow(() -> new InvoiceNotFoundException("No se encontró la factura con ID: " + invoiceId));
+    }
 }

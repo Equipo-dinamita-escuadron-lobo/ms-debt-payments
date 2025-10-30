@@ -26,6 +26,13 @@ public class InvoiceController {
     private final IInvoiceCommandUseCase invoiceCommandUseCase;
     private final IInvoiceRestMapper invoiceRestMapper;
 
+    @GetMapping("/invoices/{invoiceId}")
+    public ResponseEntity<InvoicePendingResponse> getInvoiceById(@PathVariable Long invoiceId) {
+        var invoice = invoiceQueryUseCase.findInvoiceById(invoiceId);
+        var response = invoiceRestMapper.toInvoicePendingResponse(invoice);
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/pending/client/{clientId}")
     public ResponseEntity<List<InvoicePendingResponse>> getPendingInvoicesByClient(@PathVariable Long clientId) {
         var pendingInvoices = invoiceQueryUseCase.findPendingInvoicesByClientId(clientId);
