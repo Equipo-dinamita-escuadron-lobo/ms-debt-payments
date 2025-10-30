@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import java.util.Map;
 import org.springframework.stereotype.Service;
 
+import debt_payments.application.input.IAccountingEventPublisher;
 import debt_payments.application.input.IPortfolioWriteOffCommandUseCase;
 import debt_payments.application.input.IPortfolioWriteOffQueryUseCase;
 import debt_payments.application.output.IInvoiceProviderPort;
@@ -31,8 +32,7 @@ public class PortfolioWriteOffService implements IPortfolioWriteOffCommandUseCas
 
     private final IPortfolioWriteOffPersistencePort writeOffPersistencePort;
     private final IInvoiceProviderPort invoiceProviderPort;
-    // private final IAccountingEventPublisher accountingEventPublisher; // Lo
-    // añadiremos cuando implementemos RabbitMQ
+    private final IAccountingEventPublisher accountingEventPublisher;
 
     @Override
     public PortfolioWriteOff createWriteOff(CreateWriteOffRequest request) {
@@ -101,8 +101,9 @@ public class PortfolioWriteOffService implements IPortfolioWriteOffCommandUseCas
             invoiceProviderPort.updateInvoice(invoice);
         }
 
-        // 4. Publicar evento para contabilidad (se implementará después)
-        // accountingEventPublisher.publishWriteOffConfirmedEvent(writeOff);
+        // 4. Publicar evento para contabilidad 
+        PortfolioWriteOffResponse writeOffToSend = buildEnrichedResponse(writeOff);
+        accountingEventPublisher.publishWriteOffConfirmedEvent(writeOffToSend);
 
         // 5. Persistir el cambio de estado del castigo
         return writeOffPersistencePort.update(writeOff);
@@ -125,8 +126,9 @@ public class PortfolioWriteOffService implements IPortfolioWriteOffCommandUseCas
             invoiceProviderPort.updateInvoice(invoice);
         }
 
-        // 4. Publicar evento de anulación para contabilidad (se implementará después)
-        // accountingEventPublisher.publishWriteOffVoidedEvent(writeOff);
+        // 4. Publicar evento de anulación para contabilidad 
+        PortfolioWriteOffResponse writeOffToSend = buildEnrichedResponse(writeOff);
+        accountingEventPublisher.publishWriteOffVoidedEvent(writeOffToSend);
 
         // 5. Persistir el cambio de estado del castigo
         return writeOffPersistencePort.update(writeOff);
