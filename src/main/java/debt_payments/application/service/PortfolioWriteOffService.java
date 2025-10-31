@@ -65,6 +65,7 @@ public class PortfolioWriteOffService implements IPortfolioWriteOffCommandUseCas
             details.add(WriteOffDetail.builder()
                     .invoiceId(invoice.getId())
                     .amountWrittenOff(invoice.getPendingValue()) // Guardamos el saldo pendiente ACTUAL
+                    .accountingAccount(invoice.getAccountingAccount())
                     .build());
         }
 
@@ -217,6 +218,7 @@ public class PortfolioWriteOffService implements IPortfolioWriteOffCommandUseCas
                     .totalValue(invoice.getTotalValue())
                     .pendingValue(detail.getAmountWrittenOff()) // ¡Importante! Mostramos el saldo que TENÍA
                     .expirationDate(invoice.getExpirationDate())
+                    .accountingAccount(invoice.getAccountingAccount())
                     .build();
                 
                 // Construir el detalle del castigo

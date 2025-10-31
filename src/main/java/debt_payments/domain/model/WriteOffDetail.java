@@ -11,4 +11,5 @@ public class WriteOffDetail {
     private Long id;
     private Long invoiceId;
     private Long amountWrittenOff;
+    private Long accountingAccount;
 }

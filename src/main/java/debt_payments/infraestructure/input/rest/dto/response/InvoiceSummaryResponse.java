@@ -19,4 +19,5 @@ public class InvoiceSummaryResponse {
     private Long totalValue;
     private Long pendingValue; // El saldo pendiente ANTES del castigo
     private LocalDate expirationDate;
+    private Long accountingAccount; // Nueva propiedad para el codigo de cuenta contable  
 }

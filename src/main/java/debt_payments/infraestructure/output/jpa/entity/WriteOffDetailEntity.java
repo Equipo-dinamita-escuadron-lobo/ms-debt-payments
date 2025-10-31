@@ -29,6 +29,9 @@ public class WriteOffDetailEntity {
     @Column(name = "amount_written_off", nullable = false)
     private Long amountWrittenOff;
 
+    @Column(name = "accounting_account", nullable = false)
+    private Long accountingAccount;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "write_off_id", nullable = false)
     private PortfolioWriteOffEntity portfolioWriteOff;
