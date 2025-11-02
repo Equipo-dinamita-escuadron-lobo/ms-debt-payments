@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,7 +39,7 @@ public class PortfolioWriteOffController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PostMapping("/{id}/confirm")
+    @PutMapping("/{id}/confirm")
     public ResponseEntity<PortfolioWriteOffResponse> confirmWriteOff(@PathVariable Long id) {
         commandUseCase.confirmWriteOff(id);
         
@@ -48,7 +49,7 @@ public class PortfolioWriteOffController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/{id}/void")
+    @PutMapping("/{id}/void")
     public ResponseEntity<PortfolioWriteOffResponse> voidWriteOffConfirmation(@PathVariable Long id) {
         commandUseCase.voidWriteOffConfirmation(id);
         
