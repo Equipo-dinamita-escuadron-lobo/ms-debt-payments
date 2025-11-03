@@ -20,7 +20,12 @@ public class RabbitAccountingConfig {
     public static final String RECEIPT_ACCOUNTING_DLX = "receipt.accounting.dlx";
     public static final String RECEIPT_ACCOUNTING_DLQ = "receipt.accounting.dlq";
     public static final String RECEIPT_ACCOUNTING_RETRY_QUEUE = "receipt.accounting.retry.queue";
-
+    
+    public static final String WRITEOFF_EXCHANGE = "writeoff.exchange";
+    public static final String WRITEOFF_ACCOUNTING_QUEUE = "writeoff.accounting.queue";
+    public static final String WRITEOFF_ACCOUNTING_DLX = "writeoff.accounting.dlx";
+    public static final String WRITEOFF_ACCOUNTING_DLQ = "writeoff.accounting.dlq";
+    public static final String WRITEOFF_ACCOUNTING_RETRY_QUEUE = "writeoff.accounting.retry.queue";
     // STATEMENT EXCHANGES
     @Bean
     FanoutExchange receiptExchange() {
@@ -30,6 +35,16 @@ public class RabbitAccountingConfig {
     @Bean
     FanoutExchange receiptAccountingDlx() {
         return new FanoutExchange(RECEIPT_ACCOUNTING_DLX, true, false);
+    }
+    
+    @Bean
+    FanoutExchange writeOffExchange() {
+        return new FanoutExchange(WRITEOFF_EXCHANGE, true, false);
+    }
+
+    @Bean
+    FanoutExchange writeOffAccountingDlx() {
+        return new FanoutExchange(WRITEOFF_ACCOUNTING_DLX, true, false);
     }
 
     // STATEMENT OF QUEUES AND BINDINGS
@@ -52,6 +67,24 @@ public class RabbitAccountingConfig {
     }
 
     @Bean
+    Queue writeOffAccountingQueue() {
+        return QueueBuilder.durable(WRITEOFF_ACCOUNTING_QUEUE)
+                .withArgument("x-dead-letter-exchange", WRITEOFF_ACCOUNTING_DLX).build();
+    }
+
+    @Bean
+    Queue writeOffAccountingDlq() {
+        return QueueBuilder.durable(WRITEOFF_ACCOUNTING_DLQ).build();
+    }
+
+    @Bean
+    Queue writeOffAccountingRetryQueue() {
+        return QueueBuilder.durable(WRITEOFF_ACCOUNTING_RETRY_QUEUE)
+                .withArgument("x-message-ttl", 10000) // 10 segundos de espera para reintento
+                .withArgument("x-dead-letter-exchange", WRITEOFF_ACCOUNTING_DLX).build();
+    }
+
+    @Bean
     Binding receiptAccountingBinding() {
         return BindingBuilder.bind(receiptAccountingQueue()).to(receiptExchange());
     }
@@ -64,5 +97,20 @@ public class RabbitAccountingConfig {
     @Bean
     Binding receiptAccountingRetryBinding() {
         return BindingBuilder.bind(receiptAccountingRetryQueue()).to(receiptAccountingDlx());
+    }
+
+    @Bean
+    Binding writeOffAccountingBinding() {
+        return BindingBuilder.bind(writeOffAccountingQueue()).to(writeOffExchange());
+    }
+
+    @Bean
+    Binding writeOffAccountingDlqBinding() {
+        return BindingBuilder.bind(writeOffAccountingDlq()).to(writeOffAccountingDlx());
+    }
+
+    @Bean
+    Binding writeOffAccountingRetryBinding() {
+        return BindingBuilder.bind(writeOffAccountingRetryQueue()).to(writeOffAccountingDlx());
     }
 }

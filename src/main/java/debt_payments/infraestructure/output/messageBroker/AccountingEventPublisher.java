@@ -53,7 +53,7 @@ public class AccountingEventPublisher implements IAccountingEventPublisher {
         EventDto<PortfolioWriteOffResponse> event = new EventDto<>("WRITEOFF_CONFIRMED", writeOffResponse);
         log.info("Publishing write-off confirmed event: {}", writeOffResponse.getCode());
 
-        rabbitTemplate.convertAndSend(RabbitAccountingConfig.RECEIPT_EXCHANGE, "", event, message -> {
+        rabbitTemplate.convertAndSend(RabbitAccountingConfig.WRITEOFF_EXCHANGE, "", event, message -> {
             message.getMessageProperties().setHeaders(Map.of(
                     "x-jwt-token", jwtUtils.getToken()
             ));
@@ -66,7 +66,7 @@ public class AccountingEventPublisher implements IAccountingEventPublisher {
         EventDto<PortfolioWriteOffResponse> event = new EventDto<>("WRITEOFF_VOIDED", writeOffResponse);
         log.info("Publishing write-off voided event: {}", writeOffResponse.getCode());
 
-        rabbitTemplate.convertAndSend(RabbitAccountingConfig.RECEIPT_EXCHANGE, "", event, message -> {
+        rabbitTemplate.convertAndSend(RabbitAccountingConfig.WRITEOFF_EXCHANGE, "", event, message -> {
             message.getMessageProperties().setHeaders(Map.of(
                     "x-jwt-token", jwtUtils.getToken()
             ));
