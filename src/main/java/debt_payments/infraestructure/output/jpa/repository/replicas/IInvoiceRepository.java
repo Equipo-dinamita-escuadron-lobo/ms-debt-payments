@@ -24,6 +24,15 @@ public interface IInvoiceRepository extends JpaRepository<InvoiceReplicaEntity, 
     List<InvoiceReplicaEntity> findByThirdIdAndPendingValueGreaterThan(Long thirdId, Long pendingValue);
 
     /**
+     * Encuentra todas las facturas de un cliente específico (ThirdParty) con un estado específico.
+     *
+     * @param thirdId El ID del cliente.
+     * @param status El estado de la factura.
+     * @return Una lista de entidades de facturas con el estado especificado.
+     */
+    List<InvoiceReplicaEntity> findByThirdIdAndStatus(Long thirdId, InvoiceStatus status);
+
+    /**
      * Busca todas las entidades de factura cuyos IDs están en la lista proporcionada.
      */
     List<InvoiceReplicaEntity> findByIdIn(List<Long> ids);

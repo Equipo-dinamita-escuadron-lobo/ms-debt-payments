@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import debt_payments.application.input.IInvoiceCommandUseCase;
 import debt_payments.application.input.IInvoiceQueryUseCase;
+import debt_payments.domain.enums.InvoiceStatus;
 import debt_payments.infraestructure.input.rest.dto.request.UpdateDueDateRequest;
 import debt_payments.infraestructure.input.rest.dto.response.InvoicePendingResponse;
 import debt_payments.infraestructure.input.rest.mapper.IInvoiceRestMapper;
@@ -35,7 +36,7 @@ public class InvoiceController {
 
     @GetMapping("/pending/client/{clientId}")
     public ResponseEntity<List<InvoicePendingResponse>> getPendingInvoicesByClient(@PathVariable Long clientId) {
-        var pendingInvoices = invoiceQueryUseCase.findPendingInvoicesByClientId(clientId);
+        var pendingInvoices = invoiceQueryUseCase.findStatusInvoicesByClientId(clientId, InvoiceStatus.PENDING);
         return ResponseEntity.ok(invoiceRestMapper.toInvoicePendingResponseList(pendingInvoices));
     }
 
@@ -49,5 +50,19 @@ public class InvoiceController {
     public ResponseEntity<List<InvoicePendingResponse>> getInvoicesByEnterpriseId(@PathVariable String enterpriseId) {
         var pendingInvoices = invoiceQueryUseCase.findInvoicesByEnterpriseId(enterpriseId);
         return ResponseEntity.ok(invoiceRestMapper.toInvoicePendingResponseList(pendingInvoices));
+    }
+
+    @GetMapping("invoices/pending/by-enterprise/{enterpriseId}")
+    public ResponseEntity<List<InvoicePendingResponse>> getPendingInvoicesByEnterpriseId(@PathVariable String enterpriseId) {
+        var pendingInvoices = invoiceQueryUseCase.findPendingInvoicesByEnterpriseId(enterpriseId);
+        return ResponseEntity.ok(invoiceRestMapper.toInvoicePendingResponseList(pendingInvoices));
+    }
+
+    @GetMapping("invoices/status/by-client/{clientId}/{status}")
+    public ResponseEntity<List<InvoicePendingResponse>> getStatusInvoicesByClientId(
+            @PathVariable Long clientId,
+            @PathVariable InvoiceStatus status) {
+        var invoices = invoiceQueryUseCase.findStatusInvoicesByClientId(clientId, status);
+        return ResponseEntity.ok(invoiceRestMapper.toInvoicePendingResponseList(invoices));
     }
 }

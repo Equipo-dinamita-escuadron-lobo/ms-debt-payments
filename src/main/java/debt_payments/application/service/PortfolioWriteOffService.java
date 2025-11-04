@@ -82,7 +82,14 @@ public class PortfolioWriteOffService implements IPortfolioWriteOffCommandUseCas
                 .details(details)
                 .build();
 
-        // 3. Persistir usando el puerto de salida
+        // 3. Aplicar los efectos secundarios (modificar facturas)
+        for (WriteOffDetail detail : newWriteOff.getDetails()) {
+            InvoiceReplica invoice = invoiceMap.get(detail.getInvoiceId());
+            invoice.setStatus(debt_payments.domain.enums.InvoiceStatus.PENDING_WRITTEN_OFF);
+            invoiceProviderPort.updateInvoice(invoice);
+        }
+
+        // 4. Persistir usando el puerto de salida
         return writeOffPersistencePort.save(newWriteOff);
     }
 

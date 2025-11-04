@@ -3,6 +3,7 @@ package debt_payments.application.output;
 import java.util.List;
 import java.util.Optional;
 
+import debt_payments.domain.enums.InvoiceStatus;
 import debt_payments.domain.model.Replica.InvoiceReplica;
 
 public interface IInvoiceProviderPort {
@@ -46,4 +47,19 @@ public interface IInvoiceProviderPort {
      * @return Una lista de objetos de dominio InvoiceReplica que pertenecen a la empresa especificada.
      */
     List<InvoiceReplica> findInvoicesByEnterpriseId(String enterpriseId);
+
+    /**
+     * Busca una lista de facturas pendientes por el ID de la empresa.
+     * @param enterpriseId El ID de la empresa.
+     * @return Una lista de objetos de dominio InvoiceReplica que están pendientes.
+     */
+    List<InvoiceReplica> findPendingInvoicesByEnterpriseId(String enterpriseId);
+
+    /**
+     * Busca facturas por Id de cliente y estado.
+     * @param clientId El ID del cliente.
+     * @param status El estado de las facturas a filtrar.
+     * @return Una lista de objetos de dominio InvoiceReplica que representan las facturas con el estado especificado del cliente.
+     */
+    List<InvoiceReplica> findStatusInvoicesByClientId(Long clientId, InvoiceStatus status);
 }
