@@ -1,20 +1,20 @@
 package debt_payments.application.input;
 
+import debt_payments.domain.model.Receipt;
 import debt_payments.infraestructure.input.rest.dto.response.PortfolioWriteOffResponse;
-import debt_payments.infraestructure.input.rest.dto.response.ReceiptResponse;
 
 public interface IAccountingEventPublisher {
     /**
      * Publica un evento cuando un recibo de caja es creado.
-     * @param receiptResponse El DTO del recibo de caja creado.
+     * @param receipt El recibo de caja creado.
      */
-    void publishReceiptCreatedEvent(ReceiptResponse receiptResponse);
+    void publishReceiptCreatedEvent(Receipt receipt);
 
     /**
      * Publica un evento cuando un recibo de caja es anulado.
-     * @param receiptResponse El DTO del recibo de caja anulado.
+     * @param receipt El recibo de caja anulado.
      */
-    void publishVoidReceiptEvent(ReceiptResponse receiptResponse);
+    void publishVoidReceiptEvent(Receipt receipt);
 
     /**
      * Publica un evento cuando un castigo de cartera es confirmado.

@@ -28,7 +28,7 @@ public class InvoiceReplica {
 
 
     /**
-     * Lógica de negocio para castigar la cartera.
+     * Method to write off the invoice.
      */
     public void writeOff() {
         if (this.status == InvoiceStatus.PAID) 
@@ -42,11 +42,52 @@ public class InvoiceReplica {
     }
 
     /**
-     * Metodo para validar que la fecha de vencimiento no sea anterior a la fecha de creacion.
+     * Method to validate the dates of the invoice.
      */
     public void validateDates() {
         if (this.expirationDate.isBefore(this.creationDate)) {
             throw new IllegalArgumentException("Expiration date cannot be before creation date. FactCode: " + this.factCode);
+        }
+    }
+
+    /**
+     * Method to apply a payment to the invoice.
+     * @param amountToPay Amount to be paid in a Receipt
+     * @throws Exception if payment cannot be applied
+     */
+    public void applyPayment(Long amountToPay) throws Exception {
+        if (this.status == InvoiceStatus.PAID) {
+            throw new Exception("Cannot apply payment to a fully paid invoice. FactCode: " + this.factCode);
+        }
+        if (amountToPay <= 0) {
+            throw new Exception("Payment amount must be positive. FactCode: " + this.factCode);
+        }
+        if (amountToPay > this.pendingValue) {
+            throw new Exception("Amount paid (" + amountToPay + ") exceeds the pending balance (" + this.pendingValue + "). FactCode: " + this.factCode);
+        }
+        
+        this.pendingValue -= amountToPay;
+        this.totalPay += amountToPay;
+        
+        if (this.pendingValue == 0) {
+            this.status = InvoiceStatus.PAID;
+        } else {
+            this.status = InvoiceStatus.PENDING;
+        }
+    }
+
+    public void reversePayment(Long amountToReverse) throws Exception {
+        if (amountToReverse <= 0) {
+            throw new Exception("Amount to reverse must be positive. FactCode: " + this.factCode);
+        }
+
+        this.pendingValue += amountToReverse;
+        this.totalPay -= amountToReverse;
+        
+        if (this.totalPay <= 0) {
+            this.totalPay = 0L;
+            this.pendingValue = this.totalValue;
+            this.status = InvoiceStatus.PENDING; 
         }
     }
 }

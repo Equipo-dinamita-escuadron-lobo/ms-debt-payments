@@ -13,14 +13,10 @@ import debt_payments.application.input.IReceiptQueryUseCase;
 import debt_payments.application.output.IInvoiceProviderPort;
 import debt_payments.application.output.IReceiptCommandPersistencePort;
 import debt_payments.application.output.IReceiptQueryPersistencePort;
-import debt_payments.domain.exception.InvoiceNotFoundException;
 import debt_payments.domain.exception.ReceiptNotFoundException;
 import debt_payments.domain.model.Receipt;
-import debt_payments.domain.model.ReceiptDetail;
 import debt_payments.domain.model.ReceiptStatus;
 import debt_payments.domain.model.Replica.InvoiceReplica;
-import debt_payments.infraestructure.input.rest.dto.response.ReceiptResponse;
-import debt_payments.infraestructure.input.rest.mapper.IReceiptRestMapper;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -32,7 +28,6 @@ public class ReceiptService implements IReceiptCommandUseCase, IReceiptQueryUseC
     private final IInvoiceProviderPort invoiceProviderPort;
 
     private final IAccountingEventPublisher accountingEventPublisher;
-    private final IReceiptRestMapper receiptRestMapper;
 
     /**
      * Creates a new receipt after validating external dependencies and generating a unique receipt code.
@@ -40,65 +35,37 @@ public class ReceiptService implements IReceiptCommandUseCase, IReceiptQueryUseC
      * @return The created receipt with updated fields.
      */
     @Override
+    @Transactional
     public Receipt createReceipt(Receipt receipt) {
 
-        Long totalAmount = 0L; 
+        // Generar un código único para el recibo
+        String uniqueCode = generateUniqueReceiptCode();
+        receipt.setReceiptCode(uniqueCode);
 
-        if (receipt.isInvoicePayment()) {
-            if (receipt.getDetails() == null || receipt.getDetails().isEmpty()) {
-                throw new IllegalArgumentException("Invoice payment details are required.");
-            }
-            
-            for (ReceiptDetail detail : receipt.getDetails()) {
-                // 1. Buscar la factura
-                InvoiceReplica invoice = invoiceProviderPort.findInvoiceById(detail.getInvoiceId())
-                    .orElseThrow(() -> new IllegalArgumentException("Invoice with id " + detail.getInvoiceId() + " does not exist."));
-
-                // 2. Validar que el pago no exceda el saldo
-                if (detail.getAmountPaid() > invoice.getPendingValue()) {
-                    throw new IllegalArgumentException("Amount paid for invoice " + invoice.getFactCode() + " exceeds the pending balance.");
+        // Si es pago a facturas, delegar la lógica al objeto de dominio para aplicar pagos
+        try {
+            if (receipt.isInvoicePayment()) {
+                List<InvoiceReplica> modifiedInvoices = receipt.processInvoicePayments(invoiceProviderPort::findInvoiceById);
+                // Persistir las facturas modificadas
+                for (InvoiceReplica inv : modifiedInvoices) {
+                    invoiceProviderPort.updateInvoice(inv);
                 }
-
-                // 3. Actualizar el saldo de la factura
-                invoice.setPendingValue(invoice.getPendingValue() - detail.getAmountPaid());
-                invoice.setTotalPay(invoice.getTotalPay() + detail.getAmountPaid());
-                invoiceProviderPort.updateInvoice(invoice);
-
-                // 4. Guardar el código de la factura en el detalle 
-                detail.setInvoiceCode(invoice.getFactCode());
-                detail.setAccountingAccount(invoice.getAccountingAccount());
-                
-                
-                // 5. Sumar al total del recibo
-                totalAmount += detail.getAmountPaid();
             }
-        }else{
-            totalAmount = receipt.getTotalAmount();
+        } catch (Exception e) {
+            throw new IllegalStateException("Error processing invoice payments: " + e.getMessage(), e);
         }
-
-        // 6. Completar y guardar el recibo
-        //Para guardar monto total dependiendo del tipo de recibo
-        if(receipt.isInvoicePayment()){
-            receipt.setTotalAmount(totalAmount);
-        }else{
-            receipt.setTotalAmount(receipt.getTotalAmount());
-        }
-        
-        receipt.setReceiptCode(generateUniqueReceiptCode());
-        receipt.setIssueDate(LocalDate.now());
         receipt.setStatus(ReceiptStatus.FINALIZED);
-        
-
+        receipt.setIssueDate(LocalDate.now());
         Receipt savedReceipt = receiptCommandPersistencePort.save(receipt);
 
         //Lineas para publicar el evento de creación
-        ReceiptResponse receiptResponse = receiptRestMapper.toResponse(savedReceipt);
-        accountingEventPublisher.publishReceiptCreatedEvent(receiptResponse);
+        accountingEventPublisher.publishReceiptCreatedEvent(savedReceipt);
 
         return savedReceipt;
     }
 
     @Override
+    @Transactional
     public Receipt voidReceipt(Long receiptId, String reasonDescription) {
         Receipt receiptToVoid = receiptQueryPersistencePort.findById(receiptId)
             .orElseThrow(() -> new ReceiptNotFoundException("Receipt with id " + receiptId + " does not exist."));
@@ -107,29 +74,22 @@ public class ReceiptService implements IReceiptCommandUseCase, IReceiptQueryUseC
             throw new IllegalStateException("Receipt with id " + receiptId + " is already voided.");
         }
 
-        // 1. Revertir los pagos en las facturas afectadas
-        if (receiptToVoid.isInvoicePayment()) {
-            for (ReceiptDetail detail : receiptToVoid.getDetails()) {
-                InvoiceReplica invoice = invoiceProviderPort.findInvoiceById(detail.getInvoiceId())
-                    .orElseThrow(() -> new InvoiceNotFoundException("Associated invoice with id " + detail.getInvoiceId() + " not found. Data might be inconsistent."));
-
-                // Revertir el saldo de la factura
-                invoice.setPendingValue(invoice.getPendingValue() + detail.getAmountPaid());
-                invoice.setTotalPay(invoice.getTotalPay() - detail.getAmountPaid());
-                invoiceProviderPort.updateInvoice(invoice);
+        // Delegar la anulación al objeto de dominio que devuelve las facturas modificadas
+        try {
+            List<InvoiceReplica> modifiedInvoices = receiptToVoid.voidReceipt(reasonDescription, invoiceProviderPort::findInvoiceById);
+            // Persistir las facturas modificadas
+            for (InvoiceReplica inv : modifiedInvoices) {
+                invoiceProviderPort.updateInvoice(inv);
             }
+        } catch (Exception e) {
+            throw new IllegalStateException("Error reversing invoice payments when voiding receipt: " + e.getMessage(), e);
         }
-        
-        // 2. Actualizar el estado del recibo
-        receiptToVoid.setStatus(ReceiptStatus.VOIDED);
-        receiptToVoid.setVoidReasonDescription(reasonDescription);
-        receiptToVoid.setVoidDate(LocalDate.now());
 
+        // Persistir el recibo anulado
         Receipt voidedReceipt = receiptCommandPersistencePort.save(receiptToVoid);
 
         //Lineas para publicar el evento de anulación
-        ReceiptResponse receiptResponse = receiptRestMapper.toResponse(voidedReceipt);
-        accountingEventPublisher.publishVoidReceiptEvent(receiptResponse);
+        accountingEventPublisher.publishVoidReceiptEvent(voidedReceipt);
 
         return voidedReceipt;
     }

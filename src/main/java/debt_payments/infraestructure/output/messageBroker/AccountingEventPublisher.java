@@ -6,10 +6,12 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 
 import debt_payments.application.input.IAccountingEventPublisher;
+import debt_payments.domain.model.Receipt;
 import debt_payments.infraestructure.config.RabbitAccountingConfig;
 import debt_payments.infraestructure.input.rest.dto.response.PortfolioWriteOffResponse;
-import debt_payments.infraestructure.input.rest.dto.response.ReceiptResponse;
 import debt_payments.infraestructure.output.messageBroker.dto.EventDto;
+import debt_payments.infraestructure.output.messageBroker.dto.ReceiptEventDto;
+import debt_payments.infraestructure.output.messageBroker.mapper.IReceiptEventMapper;
 import debt_payments.infraestructure.output.security.IJwtUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,14 +20,15 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class AccountingEventPublisher implements IAccountingEventPublisher {
-
+    private final IReceiptEventMapper receiptEventMapper;
     private final RabbitTemplate rabbitTemplate;
     private final IJwtUtils jwtUtils;
 
     @Override
-    public void publishReceiptCreatedEvent(ReceiptResponse receiptResponse) {
-        EventDto<ReceiptResponse> event = new EventDto<>("RECEIPT_CREATED", receiptResponse);
-        log.info("Publishing receipt created event: {}", receiptResponse.getReceiptCode());
+    public void publishReceiptCreatedEvent(Receipt receipt) {
+        ReceiptEventDto receiptEventDto = receiptEventMapper.toEventDto(receipt);
+        EventDto<ReceiptEventDto> event = new EventDto<>("RECEIPT_CREATED", receiptEventDto);
+        log.info("Publishing receipt created event: {}", receiptEventDto.getReceiptCode());
 
         rabbitTemplate.convertAndSend(RabbitAccountingConfig.RECEIPT_EXCHANGE, "", event, message -> {
             message.getMessageProperties().setHeaders(Map.of(
@@ -36,9 +39,10 @@ public class AccountingEventPublisher implements IAccountingEventPublisher {
     }
 
     @Override
-    public void publishVoidReceiptEvent(ReceiptResponse receiptResponse) {
-        EventDto<ReceiptResponse> event = new EventDto<>("RECEIPT_VOIDED", receiptResponse);
-        log.info("Publishing receipt voided event: {}", receiptResponse.getReceiptCode());
+    public void publishVoidReceiptEvent(Receipt receipt) {
+        ReceiptEventDto receiptEventDto = receiptEventMapper.toEventDto(receipt);
+        EventDto<ReceiptEventDto> event = new EventDto<>("RECEIPT_VOIDED", receiptEventDto);
+        log.info("Publishing receipt voided event: {}", receiptEventDto.getReceiptCode());
 
         rabbitTemplate.convertAndSend(RabbitAccountingConfig.RECEIPT_EXCHANGE, "", event, message -> {
             message.getMessageProperties().setHeaders(Map.of(
