@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.hibernate.annotations.TenantId;
 
+import debt_payments.domain.enums.ReceiptType;
 import debt_payments.domain.model.ReceiptStatus;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -47,8 +48,9 @@ public class ReceiptEntity {
     @Column(name = "payment_method_account", nullable = false)
     private Long paymentMethodAccount;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "receipt_type", nullable = false)
-    private Long receiptTypeId;
+    private ReceiptType receiptType;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)

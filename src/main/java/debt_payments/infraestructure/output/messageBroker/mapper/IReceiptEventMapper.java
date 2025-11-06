@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Named;
 
 import debt_payments.domain.model.Receipt;
 import debt_payments.domain.model.ReceiptDetail;
@@ -25,8 +24,4 @@ public interface IReceiptEventMapper {
 
     List<ReceiptEventDto> toEventDtoList(List<Receipt> receipts);
 
-    @Named("enumToString")
-    default <E extends Enum<E>> String enumToString(E anEnum) {
-        return anEnum != null ? anEnum.name() : null;
-    }
 }
