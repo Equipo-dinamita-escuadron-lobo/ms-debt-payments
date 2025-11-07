@@ -15,9 +15,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter 
+@Getter
 @Setter
-@NoArgsConstructor 
+@NoArgsConstructor
 @AllArgsConstructor
 public class Receipt {
     private Long id;
@@ -34,7 +34,7 @@ public class Receipt {
     private String voidReasonDescription;
     private LocalDate voidDate;
 
-    private Long ledgerAccountId; 
+    private Long ledgerAccountId;
     private Long centerCostId;
     private List<ReceiptDetail> details;
 
@@ -44,14 +44,16 @@ public class Receipt {
 
     /**
      * Method to create a receipt for invoice payment.
-     * @param enterpriseId ID of the enterprise
-     * @param thirdPartyId ID of the third party
+     * 
+     * @param enterpriseId    ID of the enterprise
+     * @param thirdPartyId    ID of the third party
      * @param paymentMethodId ID of the payment method
-     * @param observations Observations for the receipt
-     * @param details List of receipt details
+     * @param observations    Observations for the receipt
+     * @param details         List of receipt details
      * @return A new Receipt instance configured for invoice payment
      */
-    public static Receipt createForInvoicePayment(String enterpriseId, Long thirdPartyId, Long paymentMethodId, String observations, List<ReceiptDetail> details) {
+    public static Receipt createForInvoicePayment(String enterpriseId, Long thirdPartyId, Long paymentMethodId,
+            String observations, List<ReceiptDetail> details) {
         if (details == null || details.isEmpty()) {
             throw new IllegalArgumentException("Invoice payment receipt must have at least one detail.");
         }
@@ -65,21 +67,22 @@ public class Receipt {
         receipt.details.addAll(details);
         receipt.status = ReceiptStatus.FINALIZED;
         receipt.issueDate = LocalDate.now();
-        // El código y el total se calculan después, en el servicio o al persistir
         return receipt;
     }
 
     /**
      * Fabric to create a receipt for direct income.
-     * @param enterpriseId ID of the enterprise
-     * @param thirdPartyId ID of the third party
+     * 
+     * @param enterpriseId    ID of the enterprise
+     * @param thirdPartyId    ID of the third party
      * @param paymentMethodId ID of the payment method
-     * @param observations Observations for the receipt
-     * @param totalAmount Total amount of the receipt 
+     * @param observations    Observations for the receipt
+     * @param totalAmount     Total amount of the receipt
      * @param ledgerAccountId Account ledger ID
      * @return A new Receipt instance configured for direct income
      */
-    public static Receipt createForDirectIncome(String enterpriseId, Long thirdPartyId, Long paymentMethodId, String observations, Long totalAmount, Long ledgerAccountId) {
+    public static Receipt createForDirectIncome(String enterpriseId, Long thirdPartyId, Long paymentMethodId,
+            String observations, Long totalAmount, Long ledgerAccountId) {
         if (totalAmount == null || totalAmount <= 0) {
             throw new IllegalArgumentException("Direct income receipt must have a positive total amount.");
         }
@@ -97,31 +100,34 @@ public class Receipt {
         receipt.ledgerAccountId = ledgerAccountId;
         receipt.status = ReceiptStatus.FINALIZED;
         receipt.issueDate = LocalDate.now();
-        
+
         return receipt;
     }
 
-     /**
+    /**
      * Apply payments from the receipt details to the corresponding invoices.
+     * 
      * @param invoiceFinder A function that knows how to find an invoice by its ID.
      * @return A list of modified invoices that need to be persisted.
-     * @throws Exception 
+     * @throws Exception
      */
-    public List<InvoiceReplica> processInvoicePayments(Function<Long, Optional<InvoiceReplica>> invoiceFinder) throws Exception {
+    public List<InvoiceReplica> processInvoicePayments(Function<Long, Optional<InvoiceReplica>> invoiceFinder)
+            throws Exception {
         if (this.receiptType != ReceiptType.INVOICE_PAYMENT) {
             return Collections.emptyList();
         }
-        
+
         this.calculateTotalFromDetails(); // Asegura que el total sea correcto
 
         List<InvoiceReplica> modifiedInvoices = new ArrayList<>();
         for (ReceiptDetail detail : this.details) {
             InvoiceReplica invoice = invoiceFinder.apply(detail.getInvoiceId())
-                .orElseThrow(() -> new InvoiceNotFoundException("Invoice with id " + detail.getInvoiceId() + " not found."));
-            
+                    .orElseThrow(() -> new InvoiceNotFoundException(
+                            "Invoice with id " + detail.getInvoiceId() + " not found."));
+
             // Delegamos la lógica de aplicar el pago a la factura
             invoice.applyPayment(detail.getAmountPaid());
-            
+
             // Completamos el detalle con info de la factura
             detail.setInvoiceCode(invoice.getFactCode());
             detail.setAccountingAccount(invoice.getAccountingAccount());
@@ -132,12 +138,14 @@ public class Receipt {
 
     /**
      * Void the receipt, reversing its effects on associated invoices if applicable.
-     * @param reason The reason for voiding the receipt.
+     * 
+     * @param reason        The reason for voiding the receipt.
      * @param invoiceFinder A function that knows how to find an invoice by its ID.
      * @return A list of modified invoices that need to be persisted.
-     * @throws Exception 
+     * @throws Exception
      */
-    public List<InvoiceReplica> voidReceipt(String reason, Function<Long, Optional<InvoiceReplica>> invoiceFinder) throws Exception {
+    public List<InvoiceReplica> voidReceipt(String reason, Function<Long, Optional<InvoiceReplica>> invoiceFinder)
+            throws Exception {
         if (this.status == ReceiptStatus.VOIDED) {
             throw new IllegalStateException("Receipt is already voided.");
         }
@@ -147,7 +155,7 @@ public class Receipt {
         this.status = ReceiptStatus.VOIDED;
         this.voidReasonDescription = reason;
         this.voidDate = LocalDate.now();
-        
+
         if (this.receiptType != ReceiptType.INVOICE_PAYMENT) {
             return Collections.emptyList();
         }
@@ -155,8 +163,9 @@ public class Receipt {
         List<InvoiceReplica> modifiedInvoices = new ArrayList<>();
         for (ReceiptDetail detail : this.details) {
             InvoiceReplica invoice = invoiceFinder.apply(detail.getInvoiceId())
-                .orElseThrow(() -> new InvoiceNotFoundException("Associated invoice with id " + detail.getInvoiceId() + " not found. Data might be inconsistent."));
-            
+                    .orElseThrow(() -> new InvoiceNotFoundException("Associated invoice with id "
+                            + detail.getInvoiceId() + " not found. Data might be inconsistent."));
+
             // Delegamos la lógica de revertir el pago a la factura
             invoice.reversePayment(detail.getAmountPaid());
             modifiedInvoices.add(invoice);
@@ -174,8 +183,8 @@ public class Receipt {
     private void calculateTotalFromDetails() {
         if (this.receiptType == ReceiptType.INVOICE_PAYMENT) {
             this.totalAmount = this.details.stream()
-                .mapToLong(ReceiptDetail::getAmountPaid)
-                .sum();
+                    .mapToLong(ReceiptDetail::getAmountPaid)
+                    .sum();
         }
     }
 }

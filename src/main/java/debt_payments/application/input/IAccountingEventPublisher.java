@@ -1,7 +1,7 @@
 package debt_payments.application.input;
 
+import debt_payments.domain.model.PortfolioWriteOff;
 import debt_payments.domain.model.Receipt;
-import debt_payments.infraestructure.input.rest.dto.response.PortfolioWriteOffResponse;
 
 public interface IAccountingEventPublisher {
     /**
@@ -18,13 +18,13 @@ public interface IAccountingEventPublisher {
 
     /**
      * Publica un evento cuando un castigo de cartera es confirmado.
-     * @param writeOffResponse El DTO del castigo de cartera confirmado.
+     * @param writeOff El objeto de dominio del castigo de cartera confirmado.
      */
-    void publishWriteOffConfirmedEvent(PortfolioWriteOffResponse writeOffResponse);
+    void publishWriteOffConfirmedEvent(PortfolioWriteOff writeOff);
 
     /**
      * Publica un evento cuando un castigo de cartera es anulado.
-     * @param writeOffResponse El DTO del castigo de cartera anulado.
+     * @param writeOff El objeto de dominio del castigo de cartera anulado.
      */
-    void publishWriteOffVoidedEvent(PortfolioWriteOffResponse writeOffResponse);
+    void publishWriteOffVoidedEvent(PortfolioWriteOff writeOff);
 }

@@ -55,15 +55,15 @@ public class InvoiceReplica {
      * @param amountToPay Amount to be paid in a Receipt
      * @throws Exception if payment cannot be applied
      */
-    public void applyPayment(Long amountToPay) throws Exception {
+    public void applyPayment(Long amountToPay) {
         if (this.status == InvoiceStatus.PAID) {
-            throw new Exception("Cannot apply payment to a fully paid invoice. FactCode: " + this.factCode);
+            throw new IllegalStateException("Cannot apply payment to a fully paid invoice. FactCode: " + this.factCode);
         }
         if (amountToPay <= 0) {
-            throw new Exception("Payment amount must be positive. FactCode: " + this.factCode);
+            throw new IllegalStateException("Payment amount must be positive. FactCode: " + this.factCode);
         }
         if (amountToPay > this.pendingValue) {
-            throw new Exception("Amount paid (" + amountToPay + ") exceeds the pending balance (" + this.pendingValue + "). FactCode: " + this.factCode);
+            throw new IllegalStateException("Amount paid (" + amountToPay + ") exceeds the pending balance (" + this.pendingValue + "). FactCode: " + this.factCode);
         }
         
         this.pendingValue -= amountToPay;
@@ -76,9 +76,13 @@ public class InvoiceReplica {
         }
     }
 
-    public void reversePayment(Long amountToReverse) throws Exception {
+    /**
+     * Method to reverse a payment applied to the invoice in a Receipt.
+     * @param amountToReverse Amount to be reversed
+     */
+    public void reversePayment(Long amountToReverse) {
         if (amountToReverse <= 0) {
-            throw new Exception("Amount to reverse must be positive. FactCode: " + this.factCode);
+            throw new IllegalArgumentException("Amount to reverse must be positive. FactCode: " + this.factCode);
         }
 
         this.pendingValue += amountToReverse;
@@ -89,5 +93,25 @@ public class InvoiceReplica {
             this.pendingValue = this.totalValue;
             this.status = InvoiceStatus.PENDING; 
         }
+    }
+
+    /**
+     * Marc the invoice as pending write-off.
+     */
+    public void markAsPendingWriteOff() {
+        // Podrías añadir validaciones aquí si fuera necesario
+        this.status = InvoiceStatus.PENDING_WRITTEN_OFF;
+    }
+
+    /**
+     * Reverse the write-off of the invoice.
+     * @param amountToRestore Amount to restore to pending value
+     */
+    public void reverseWriteOff(Long amountToRestore) {
+        if (this.status != InvoiceStatus.WRITTEN_OFF) {
+            return; 
+        }
+        this.status = InvoiceStatus.PENDING;
+        this.pendingValue = amountToRestore;
     }
 }
