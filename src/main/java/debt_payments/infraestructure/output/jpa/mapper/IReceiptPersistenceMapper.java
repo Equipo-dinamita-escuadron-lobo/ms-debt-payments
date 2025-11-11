@@ -16,10 +16,12 @@ import debt_payments.infraestructure.output.jpa.entity.ReceiptEntity;
         unmappedTargetPolicy = ReportingPolicy.IGNORE) // Ignora advertencias si no todos los campos se mapean
 public interface IReceiptPersistenceMapper {
 
+    //@Mapping(source = "receiptTypeId", target = "receiptType")
     Receipt toDomain(ReceiptEntity entity);
     List<Receipt> toDomainList(List<ReceiptEntity> entityList);
     ReceiptDetail toDomain(ReceiptDetailEntity detailEntity);
 
+    //@Mapping(source = "receiptType.id", target = "receiptTypeId")
     ReceiptEntity toEntity(Receipt domain);
     ReceiptDetailEntity toEntity(ReceiptDetail detailDomain);
     List<ReceiptEntity> toEntityList(List<Receipt> domainList);

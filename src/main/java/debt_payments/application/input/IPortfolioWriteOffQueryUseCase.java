@@ -3,20 +3,19 @@ package debt_payments.application.input;
 import java.util.List;
 import java.util.Optional;
 
-import debt_payments.infraestructure.input.rest.dto.response.PortfolioWriteOffResponse;
-
+import debt_payments.domain.model.PortfolioWriteOff;
 public interface IPortfolioWriteOffQueryUseCase {
     /**
-     * Busca un registro de castigo por su ID y lo enriquece con los datos de las facturas.
+     * Busca un registro de castigo por su ID.
      * @param writeOffId El ID del castigo a buscar.
-     * @return Un DTO de respuesta con toda la información necesaria para el frontend.
+     * @return Un Optional del modelo de dominio.
      */
-    Optional<PortfolioWriteOffResponse> findById(Long writeOffId);
+    Optional<PortfolioWriteOff> findById(Long writeOffId);
 
     /**
      * Lista todos los registros de castigo para una empresa específica.
      * @param enterpriseId El ID de la empresa.
-     * @return Una lista de DTOs de respuesta con la información de los castigos.
+     * @return Una lista de modelos de dominio.
      */
-    List<PortfolioWriteOffResponse> findByEnterpriseId(String enterpriseId);
+    List<PortfolioWriteOff> findByEnterpriseId(String enterpriseId);
 }
