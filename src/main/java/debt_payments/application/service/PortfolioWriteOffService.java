@@ -11,6 +11,7 @@ import debt_payments.application.input.IPortfolioWriteOffCommandUseCase;
 import debt_payments.application.input.IPortfolioWriteOffQueryUseCase;
 import debt_payments.application.output.IInvoiceProviderPort;
 import debt_payments.application.output.IPortfolioWriteOffPersistencePort;
+import debt_payments.domain.exception.PortfolioWriteOffNotFoundException;
 import debt_payments.domain.model.PortfolioWriteOff;
 import debt_payments.domain.model.Replica.InvoiceReplica;
 import lombok.RequiredArgsConstructor;
@@ -84,7 +85,7 @@ public class PortfolioWriteOffService implements IPortfolioWriteOffCommandUseCas
     @Override
     @Transactional(readOnly = true)
     public Optional<PortfolioWriteOff> findById(Long writeOffId) {
-        return writeOffPersistencePort.findById(writeOffId);
+        return Optional.of(findWriteOffOrThrow(writeOffId));
     }
 
     @Override
@@ -102,7 +103,7 @@ public class PortfolioWriteOffService implements IPortfolioWriteOffCommandUseCas
      */
     private PortfolioWriteOff findWriteOffOrThrow(Long writeOffId) {
         return writeOffPersistencePort.findById(writeOffId)
-                .orElseThrow(() -> new RuntimeException("PortfolioWriteOff not found with id: " + writeOffId));
+                .orElseThrow(() -> new PortfolioWriteOffNotFoundException("PortfolioWriteOff not found with id: " + writeOffId));
     }
 
     private String generateUniqueWriteOffCode() {
