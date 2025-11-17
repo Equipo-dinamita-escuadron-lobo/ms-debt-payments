@@ -5,12 +5,12 @@ import java.time.LocalDate;
 import debt_payments.domain.enums.InvoiceStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
-@NoArgsConstructor
+@RequiredArgsConstructor
 @AllArgsConstructor
 public class InvoiceReplica {
     private Long id;
