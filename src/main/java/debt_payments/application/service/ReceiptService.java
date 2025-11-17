@@ -10,9 +10,12 @@ import org.springframework.transaction.annotation.Transactional;
 import debt_payments.application.input.IAccountingEventPublisher;
 import debt_payments.application.input.IReceiptCommandUseCase;
 import debt_payments.application.input.IReceiptQueryUseCase;
+import debt_payments.application.output.ICostCenterEventPublisher;
 import debt_payments.application.output.IInvoiceProviderPort;
 import debt_payments.application.output.IReceiptCommandPersistencePort;
 import debt_payments.application.output.IReceiptQueryPersistencePort;
+import debt_payments.application.output.IThirdEventPublisher;
+import debt_payments.domain.enums.ReceiptType;
 import debt_payments.domain.exception.ReceiptNotFoundException;
 import debt_payments.domain.model.Receipt;
 import debt_payments.domain.model.ReceiptStatus;
@@ -26,8 +29,9 @@ public class ReceiptService implements IReceiptCommandUseCase, IReceiptQueryUseC
     private final IReceiptCommandPersistencePort receiptCommandPersistencePort;
     private final IReceiptQueryPersistencePort receiptQueryPersistencePort;
     private final IInvoiceProviderPort invoiceProviderPort;
-
     private final IAccountingEventPublisher accountingEventPublisher;
+    private final IThirdEventPublisher thirdEventPublisher;
+    private final ICostCenterEventPublisher costCenterEventPublisher;
 
     /**
      * Creates a new receipt after validating external dependencies and generating a unique receipt code.
@@ -60,6 +64,11 @@ public class ReceiptService implements IReceiptCommandUseCase, IReceiptQueryUseC
 
         //Lineas para publicar el evento de creación
         accountingEventPublisher.publishReceiptCreatedEvent(savedReceipt);
+        thirdEventPublisher.publishThirdUsedEvent(savedReceipt.getThirdPartyId(), savedReceipt.getEnterpriseId());
+        if(savedReceipt.getReceiptType() == ReceiptType.DIRECT_INCOME){
+            costCenterEventPublisher.publishCostCenterUsedEvent(savedReceipt.getCenterCostId(), savedReceipt.getEnterpriseId());
+        }
+
 
         return savedReceipt;
     }
