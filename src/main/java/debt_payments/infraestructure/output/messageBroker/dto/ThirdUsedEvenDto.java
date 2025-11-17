@@ -12,4 +12,5 @@ import lombok.Setter;
 public class ThirdUsedEvenDto {
     private Long thirdId;
     private String enterpriseId;
+    private Integer quantityUsed;
 }

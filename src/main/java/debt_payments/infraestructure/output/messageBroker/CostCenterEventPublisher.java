@@ -23,11 +23,11 @@ public class CostCenterEventPublisher implements ICostCenterEventPublisher {
 
     @Override
     public void publishCostCenterUsedEvent(Long costCenterId, String enterpriseId) {
-        CostCenterUsedDto costCenterUsedDto = new CostCenterUsedDto(costCenterId, enterpriseId);
+        CostCenterUsedDto costCenterUsedDto = new CostCenterUsedDto(costCenterId, enterpriseId, 1);
         EventDto<CostCenterUsedDto> event = new EventDto<>("USED", costCenterUsedDto);
         log.info("Publishing cost center used event: {}", costCenterId);
 
-        rabbitTemplate.convertAndSend(RabbitCostCenterConfig.COSTCENTER_PAYMENTS_EXCHANGE, "", event, message -> {
+        rabbitTemplate.convertAndSend(RabbitCostCenterConfig.COSTCENTER_USED_EXCHANGE, "", event, message -> {
             message.getMessageProperties().setHeaders(Map.of(
                     "x-jwt-token", jwtUtils.getToken()
             ));

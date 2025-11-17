@@ -14,13 +14,13 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Profile("!test")
 public class RabbitThirdConfig {
-    public static final String THIRD_PAYMENTS_EXCHANGE = "third.payments.exchange";
+    public static final String THIRD_USED_EXCHANGE = "third.used.exchange";
     public static final String THIRD_USED_QUEUE = "third.used.queue";
 
     //Statement EXCHANGES
     @Bean
-    FanoutExchange thirdPaymentsExchange() {
-        return new FanoutExchange(THIRD_PAYMENTS_EXCHANGE, true, false);
+    FanoutExchange thirdUsedExchange() {
+        return new FanoutExchange(THIRD_USED_EXCHANGE, true, false);
     }
 
     // STATEMENT OF QUEUES AND BINDINGS
@@ -31,6 +31,6 @@ public class RabbitThirdConfig {
 
     @Bean
     Binding thirdUsedBinding(){
-        return BindingBuilder.bind(thirdUsedQueue()).to(thirdPaymentsExchange());
+        return BindingBuilder.bind(thirdUsedQueue()).to(thirdUsedExchange());
     }
 }

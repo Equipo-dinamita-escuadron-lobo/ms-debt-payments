@@ -14,13 +14,13 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Profile("!test")
 public class RabbitCostCenterConfig {
-    public static final String COSTCENTER_PAYMENTS_EXCHANGE = "costcenter.payments.exchange";
+    public static final String COSTCENTER_USED_EXCHANGE = "costcenter.used.exchange";
     public static final String COSTCENTER_USED_QUEUE = "costcenter.used.queue";
 
     //Statement EXCHANGES
     @Bean
-    FanoutExchange costCenterPaymentsExchange() {
-        return new FanoutExchange(COSTCENTER_PAYMENTS_EXCHANGE, true, false);
+    FanoutExchange costCenterUsedExchange() {
+        return new FanoutExchange(COSTCENTER_USED_EXCHANGE, true, false);
     }
 
     // STATEMENT OF QUEUES AND BINDINGS
@@ -31,6 +31,6 @@ public class RabbitCostCenterConfig {
 
     @Bean
     Binding costCenterUsedBinding(){
-        return BindingBuilder.bind(costCenterUsedQueue()).to(costCenterPaymentsExchange());
+        return BindingBuilder.bind(costCenterUsedQueue()).to(costCenterUsedExchange());
     }
 }

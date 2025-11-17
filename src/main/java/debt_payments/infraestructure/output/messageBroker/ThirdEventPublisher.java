@@ -23,11 +23,11 @@ public class ThirdEventPublisher implements IThirdEventPublisher {
 
     @Override
     public void publishThirdUsedEvent(Long thirdId, String enterpriseId) {
-        ThirdUsedEvenDto thirdUsedEvenDto = new ThirdUsedEvenDto(thirdId, enterpriseId);
+        ThirdUsedEvenDto thirdUsedEvenDto = new ThirdUsedEvenDto(thirdId, enterpriseId, 1);
         EventDto<ThirdUsedEvenDto> event = new EventDto<>("USED", thirdUsedEvenDto);
         log.info("Publishing third used event: {}", thirdId);
 
-        rabbitTemplate.convertAndSend(RabbitThirdConfig.THIRD_PAYMENTS_EXCHANGE, "", event, message -> {
+        rabbitTemplate.convertAndSend(RabbitThirdConfig.THIRD_USED_EXCHANGE, "", event, message -> {
             message.getMessageProperties().setHeaders(Map.of(
                     "x-jwt-token", jwtUtils.getToken()
             ));
