@@ -62,4 +62,48 @@ public class ReceiptTest {
 
         assertThatThrownBy(() -> r.assignReceiptCode("RC-2")).isInstanceOf(IllegalStateException.class);
     }
+
+    @Test
+    @DisplayName("assignReceiptCode assigns when not present")
+    void assignReceiptCodeAssignsWhenNotPresent() {
+        var r = TestFixtures.receiptForDirectIncome("ENT-1", 1L, 1L, "obs", 500L, 200L);
+        r.setReceiptCode(null);
+
+        r.assignReceiptCode("RC-NEW");
+        assertThat(r.getReceiptCode()).isEqualTo("RC-NEW");
+    }
+
+    @Test
+    @DisplayName("processInvoicePayments returns empty for non-invoice receipts")
+    void processInvoicePaymentsReturnsEmptyForNonInvoice() throws Exception {
+        var r = TestFixtures.receiptForDirectIncome("ENT-1", 1L, 1L, "obs", 500L, 200L);
+
+        var res = r.processInvoicePayments(id -> Optional.empty());
+        assertThat(res).isEmpty();
+    }
+
+    @Test
+    @DisplayName("processInvoicePayments throws when invoice not found")
+    void processInvoicePaymentsThrowsWhenInvoiceNotFound() {
+        var detail = TestFixtures.receiptDetail(99L, 100L);
+        var receipt = TestFixtures.receiptForInvoicePayment("ENT-1", 1L, 1L, "obs", List.of(detail));
+
+        org.junit.jupiter.api.Assertions.assertThrows(debt_payments.domain.exception.InvoiceNotFoundException.class,
+                () -> receipt.processInvoicePayments(id -> Optional.empty()));
+    }
+
+    @Test
+    @DisplayName("voidReceipt throws when already voided or reason blank")
+    void voidReceiptValidations() throws Exception {
+        var detail = TestFixtures.receiptDetail(2L, 150L);
+        var receipt = TestFixtures.receiptForInvoicePayment("ENT-1", 1L, 1L, "obs", List.of(detail));
+
+        // already voided
+        receipt.setStatus(ReceiptStatus.VOIDED);
+        assertThatThrownBy(() -> receipt.voidReceipt("reason", id -> Optional.empty())).isInstanceOf(IllegalStateException.class);
+
+        // reason blank
+        receipt.setStatus(ReceiptStatus.FINALIZED);
+        assertThatThrownBy(() -> receipt.voidReceipt("  ", id -> Optional.empty())).isInstanceOf(IllegalArgumentException.class);
+    }
 }
