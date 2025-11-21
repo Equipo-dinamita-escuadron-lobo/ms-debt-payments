@@ -5,10 +5,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import debt_payments.domain.enums.WriteOffStatus;
 import debt_payments.domain.exception.InvoiceNotFoundException;
 import debt_payments.domain.model.Replica.InvoiceReplica;
+import debt_payments.domain.model.used.AccountUsedNotification;
+import debt_payments.domain.model.used.CostCenterUsedNotification;
+import debt_payments.domain.model.used.ThirdPartyUsedNotification;
+import debt_payments.domain.ports.ResourceUsageNotification;
+import debt_payments.domain.ports.ResourceUsageProvider;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +24,7 @@ import lombok.Setter;
 @Setter
 @RequiredArgsConstructor
 @AllArgsConstructor
-public class PortfolioWriteOff {
+public class PortfolioWriteOff implements ResourceUsageProvider{
     private Long id;
     private String code;
     private String justification;
@@ -139,5 +145,37 @@ public class PortfolioWriteOff {
             modifiedInvoices.add(invoice);
         }
         return modifiedInvoices;
+    }
+
+    @Override
+    public List<ResourceUsageNotification> getUsageNotifications() {
+        List<ResourceUsageNotification> notifications = new ArrayList<>();
+
+        // 1. Tercero (siempre se usa)
+        notifications.add(new ThirdPartyUsedNotification(this.thirdId, this.enterpriseId));
+
+        // 2. Centro de Costo (solo si se especifica)
+        if (this.costCenterId != null) {
+            notifications.add(new CostCenterUsedNotification(this.costCenterId, this.enterpriseId));
+        }
+
+        // 3. Cuentas Contables
+        // 3a. La cuenta principal del castigo (débito)
+        if (this.debitAuxiliaryAccountId != null) {
+            notifications.add(new AccountUsedNotification(this.debitAuxiliaryAccount, this.enterpriseId, "CODE"));
+        }
+        
+        // 3b. Las cuentas de cada factura afectada (crédito)
+        if (this.details != null) {
+            this.details.stream()
+                .filter(detail -> detail.getAccountingAccount() != null) // Asegurarse que la cuenta no sea nula
+                .map(detail -> new AccountUsedNotification(detail.getAccountingAccount(), this.enterpriseId, "CODE"))
+                .forEach(notifications::add);
+        }
+
+        // Devolvemos solo las notificaciones únicas para no enviar el mismo evento varias veces
+        // (por si la misma cuenta contable se usa en varios detalles).
+        // NOTA: Esto requiere que implementes equals() y hashCode() en tus clases de notificación.
+        return notifications.stream().distinct().collect(Collectors.toList());
     }
 }

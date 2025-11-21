@@ -1,4 +1,4 @@
-package debt_payments.infraestructure.config;
+package debt_payments.infraestructure.config.used;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;

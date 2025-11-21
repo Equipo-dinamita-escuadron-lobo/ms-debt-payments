@@ -10,6 +10,12 @@ import java.util.function.Function;
 import debt_payments.domain.enums.ReceiptType;
 import debt_payments.domain.exception.InvoiceNotFoundException;
 import debt_payments.domain.model.Replica.InvoiceReplica;
+import debt_payments.domain.model.used.AccountUsedNotification;
+import debt_payments.domain.model.used.CostCenterUsedNotification;
+import debt_payments.domain.model.used.PaymentMethodUsedNotification;
+import debt_payments.domain.model.used.ThirdPartyUsedNotification;
+import debt_payments.domain.ports.ResourceUsageNotification;
+import debt_payments.domain.ports.ResourceUsageProvider;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,7 +25,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Receipt {
+public class Receipt implements ResourceUsageProvider {
     private Long id;
     private String receiptCode;
     private String enterpriseId;
@@ -186,5 +192,37 @@ public class Receipt {
                     .mapToLong(ReceiptDetail::getAmountPaid)
                     .sum();
         }
+    }
+
+    /**
+     * Return a list of resource usage notifications for the resources utilized by this receipt.
+     * @return A list of ResourceUsageNotification instances.
+     */
+    @Override
+    public List<ResourceUsageNotification> getUsageNotifications() {
+        List<ResourceUsageNotification> notifications = new ArrayList<>();
+
+        // 1. Tercero
+        notifications.add(new ThirdPartyUsedNotification(this.thirdPartyId, this.enterpriseId));
+
+        // 2. Centro de Costo (con su lógica)
+        if (this.receiptType == ReceiptType.DIRECT_INCOME && this.centerCostId != null) {
+            notifications.add(new CostCenterUsedNotification(this.centerCostId, this.enterpriseId));
+        }
+        
+        // 3. Método de Pago
+        if (this.paymentMethodId != null) {
+            notifications.add(new PaymentMethodUsedNotification(this.paymentMethodId, this.enterpriseId));
+        }
+
+        // 4. Cuentas Contables (de los detalles)
+        if (this.details != null) {
+            this.details.stream()
+                .map(detail -> new AccountUsedNotification(detail.getAccountingAccount(), this.enterpriseId, "CODE"))
+                .forEach(notifications::add);
+        }
+        
+        // Puedes aplicar un .distinct() si lo necesitas, pero tendrías que implementar equals/hashCode en las clases de notificación.
+        return notifications;
     }
 }

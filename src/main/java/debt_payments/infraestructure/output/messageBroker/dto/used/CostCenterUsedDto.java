@@ -1,4 +1,4 @@
-package debt_payments.infraestructure.output.messageBroker.dto;
+package debt_payments.infraestructure.output.messageBroker.dto.used;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
