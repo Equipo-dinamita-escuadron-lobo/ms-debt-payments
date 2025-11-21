@@ -27,12 +27,13 @@ public class PortfolioWriteOff {
     private Long debitAuxiliaryAccount;
     private Long debitAuxiliaryAccountId;
     private Long thirdId;
+    private Long costCenterId;
     private WriteOffStatus status;
     private String enterpriseId;
     private List<WriteOffDetail> details;
 
     public static PortfolioWriteOff create(String enterpriseId, Long thirdId, String justification,
-            List<WriteOffDetail> details) {
+            List<WriteOffDetail> details, Long costCenterId) {
         if (details == null || details.isEmpty()) {
             throw new IllegalArgumentException("A write-off must have at least one invoice detail.");
         }
@@ -47,6 +48,7 @@ public class PortfolioWriteOff {
         writeOff.details = details;
         writeOff.status = WriteOffStatus.PENDING_CONFIRMATION; // Estado inicial por defecto
         writeOff.writeOffDate = LocalDate.now();
+        writeOff.costCenterId = costCenterId;
 
         // El total debería calcularse, no asignarse
         writeOff.calculateTotalAmount();

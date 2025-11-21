@@ -38,6 +38,8 @@ public class CreateWriteOffRequest {
     @NotBlank(message = "Enterprise ID is required.")
     private String enterpriseId;
 
+    private Long costCenterId;
+
     @NotEmpty(message = "At least one invoice detail must be provided.")
     @Valid 
     private List<WriteOffDetailRequest> details;

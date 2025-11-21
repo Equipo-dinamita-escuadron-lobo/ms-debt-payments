@@ -20,6 +20,7 @@ public class PortfolioWriteOffResponse {
     private Long debitAuxiliaryAccount;
     private Long debitAuxiliaryAccountId;
     private Long thirdId;
+    private Long costCenterId;
     private WriteOffStatus status;
     private String enterpriseId;
     private List<WriteOffDetailResponse> details; // Lista de detalles enriquecidos

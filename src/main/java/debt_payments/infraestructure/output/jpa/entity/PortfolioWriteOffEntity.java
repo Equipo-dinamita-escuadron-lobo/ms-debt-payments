@@ -48,6 +48,9 @@ public class PortfolioWriteOffEntity {
     @Column(name = "debit_auxiliary_account_id", nullable = false)
     private Long debitAuxiliaryAccountId;
 
+    @Column(name = "cost_center_id")
+    private Long costCenterId;
+
     @Column(name = "third_id", nullable = false)
     private Long thirdId;
 
