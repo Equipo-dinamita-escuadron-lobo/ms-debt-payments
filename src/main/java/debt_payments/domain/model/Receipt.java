@@ -215,7 +215,16 @@ public class Receipt implements ResourceUsageProvider {
             notifications.add(new PaymentMethodUsedNotification(this.paymentMethodId, this.enterpriseId));
         }
 
-        // 4. Cuentas Contables (de los detalles)
+        // 4. Cuentas Contables principales
+        if (this.paymentMethodAccount != null) {
+            notifications.add(new AccountUsedNotification(this.paymentMethodAccount, this.enterpriseId, "CODE"));
+        }
+
+        if (this.ledgerAccountId != null) {
+            notifications.add(new AccountUsedNotification(this.ledgerAccountId, this.enterpriseId, "CODE"));
+        }
+
+        // 5. Cuentas Contables (de los detalles)
         if (this.details != null) {
             this.details.stream()
                 .map(detail -> new AccountUsedNotification(detail.getAccountingAccount(), this.enterpriseId, "CODE"))
