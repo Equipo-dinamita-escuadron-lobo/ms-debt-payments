@@ -7,17 +7,14 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 
 import debt_payments.application.output.IResourceUsageNotifierPort;
-import debt_payments.domain.model.used.AccountUsedNotification;
 import debt_payments.domain.model.used.CostCenterUsedNotification;
 import debt_payments.domain.model.used.PaymentMethodUsedNotification;
 import debt_payments.domain.model.used.ThirdPartyUsedNotification;
 import debt_payments.domain.ports.ResourceUsageNotification;
-import debt_payments.infraestructure.config.used.RabbitAccountConfig;
 import debt_payments.infraestructure.config.used.RabbitCostCenterConfig;
 import debt_payments.infraestructure.config.used.RabbitPaymentMethodConfig;
 import debt_payments.infraestructure.config.used.RabbitThirdConfig;
 import debt_payments.infraestructure.output.messageBroker.dto.EventDto;
-import debt_payments.infraestructure.output.messageBroker.dto.used.AccountUsedEventDto;
 import debt_payments.infraestructure.output.messageBroker.dto.used.CostCenterUsedDto;
 import debt_payments.infraestructure.output.messageBroker.dto.used.PaymentMethodUsedEventDto;
 import debt_payments.infraestructure.output.messageBroker.dto.used.ThirdUsedEvenDto;
@@ -43,8 +40,6 @@ public class ResourceUsagePublisher implements IResourceUsageNotifierPort {
             handle((ThirdPartyUsedNotification) notification);
         } else if (notification instanceof CostCenterUsedNotification) {
             handle((CostCenterUsedNotification) notification);
-        } else if (notification instanceof AccountUsedNotification) {
-            handle((AccountUsedNotification) notification);
         }else if (notification instanceof PaymentMethodUsedNotification) {
             handle((PaymentMethodUsedNotification) notification);
         }
@@ -71,17 +66,6 @@ public class ResourceUsagePublisher implements IResourceUsageNotifierPort {
         log.info("Publishing cost center used event: {}", notification.getCostCenterId());
 
         rabbitTemplate.convertAndSend(RabbitCostCenterConfig.COSTCENTER_USED_EXCHANGE, "", event, message -> {
-            message.getMessageProperties().setHeaders(Map.of("x-jwt-token", jwtUtils.getToken()));
-            return message;
-        });
-    }
-    
-    private void handle(AccountUsedNotification notification) {
-        AccountUsedEventDto dto = new AccountUsedEventDto(notification.getAccount(), notification.getEnterpriseId(), notification.getSourceAccountType());
-        EventDto<AccountUsedEventDto> event = new EventDto<>("USED", dto);
-        log.info("Publishing account used event: {}", notification.getAccount());
-
-        rabbitTemplate.convertAndSend(RabbitAccountConfig.ACCOUNT_USED_EXCHANGE, "", event, message -> {
             message.getMessageProperties().setHeaders(Map.of("x-jwt-token", jwtUtils.getToken()));
             return message;
         });

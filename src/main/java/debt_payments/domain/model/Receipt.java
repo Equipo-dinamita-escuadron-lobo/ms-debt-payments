@@ -10,7 +10,6 @@ import java.util.function.Function;
 import debt_payments.domain.enums.ReceiptType;
 import debt_payments.domain.exception.InvoiceNotFoundException;
 import debt_payments.domain.model.Replica.InvoiceReplica;
-import debt_payments.domain.model.used.AccountUsedNotification;
 import debt_payments.domain.model.used.CostCenterUsedNotification;
 import debt_payments.domain.model.used.PaymentMethodUsedNotification;
 import debt_payments.domain.model.used.ThirdPartyUsedNotification;
@@ -215,21 +214,7 @@ public class Receipt implements ResourceUsageProvider {
             notifications.add(new PaymentMethodUsedNotification(this.paymentMethodId, this.enterpriseId));
         }
 
-        // 4. Cuentas Contables principales
-        if (this.paymentMethodAccount != null) {
-            notifications.add(new AccountUsedNotification(this.paymentMethodAccount, this.enterpriseId, "CODE"));
-        }
-
-        if (this.ledgerAccountId != null) {
-            notifications.add(new AccountUsedNotification(this.ledgerAccountId, this.enterpriseId, "CODE"));
-        }
-
-        // 5. Cuentas Contables (de los detalles)
-        if (this.details != null) {
-            this.details.stream()
-                .map(detail -> new AccountUsedNotification(detail.getAccountingAccount(), this.enterpriseId, "CODE"))
-                .forEach(notifications::add);
-        }
+        // 4. Cuentas Contables principales ya no es necesario
         
         // Puedes aplicar un .distinct() si lo necesitas, pero tendrías que implementar equals/hashCode en las clases de notificación.
         return notifications;
