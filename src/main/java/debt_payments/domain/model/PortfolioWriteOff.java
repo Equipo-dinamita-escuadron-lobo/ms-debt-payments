@@ -5,10 +5,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import debt_payments.domain.enums.WriteOffStatus;
 import debt_payments.domain.exception.InvoiceNotFoundException;
 import debt_payments.domain.model.Replica.InvoiceReplica;
+import debt_payments.domain.model.used.CostCenterUsedNotification;
+import debt_payments.domain.model.used.ThirdPartyUsedNotification;
+import debt_payments.domain.ports.ResourceUsageNotification;
+import debt_payments.domain.ports.ResourceUsageProvider;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +23,7 @@ import lombok.Setter;
 @Setter
 @RequiredArgsConstructor
 @AllArgsConstructor
-public class PortfolioWriteOff {
+public class PortfolioWriteOff implements ResourceUsageProvider{
     private Long id;
     private String code;
     private String justification;
@@ -27,12 +32,13 @@ public class PortfolioWriteOff {
     private Long debitAuxiliaryAccount;
     private Long debitAuxiliaryAccountId;
     private Long thirdId;
+    private Long costCenterId;
     private WriteOffStatus status;
     private String enterpriseId;
     private List<WriteOffDetail> details;
 
     public static PortfolioWriteOff create(String enterpriseId, Long thirdId, String justification,
-            List<WriteOffDetail> details) {
+            List<WriteOffDetail> details, Long costCenterId) {
         if (details == null || details.isEmpty()) {
             throw new IllegalArgumentException("A write-off must have at least one invoice detail.");
         }
@@ -47,6 +53,7 @@ public class PortfolioWriteOff {
         writeOff.details = details;
         writeOff.status = WriteOffStatus.PENDING_CONFIRMATION; // Estado inicial por defecto
         writeOff.writeOffDate = LocalDate.now();
+        writeOff.costCenterId = costCenterId;
 
         // El total debería calcularse, no asignarse
         writeOff.calculateTotalAmount();
@@ -137,5 +144,25 @@ public class PortfolioWriteOff {
             modifiedInvoices.add(invoice);
         }
         return modifiedInvoices;
+    }
+
+    @Override
+    public List<ResourceUsageNotification> getUsageNotifications() {
+        List<ResourceUsageNotification> notifications = new ArrayList<>();
+
+        // 1. Tercero (siempre se usa)
+        notifications.add(new ThirdPartyUsedNotification(this.thirdId, this.enterpriseId));
+
+        // 2. Centro de Costo (solo si se especifica)
+        if (this.costCenterId != null) {
+            notifications.add(new CostCenterUsedNotification(this.costCenterId, this.enterpriseId));
+        }
+
+        // 3. Cuentas Contables ya no necesario
+
+        // Devolvemos solo las notificaciones únicas para no enviar el mismo evento varias veces
+        // (por si la misma cuenta contable se usa en varios detalles).
+        // NOTA: Esto requiere que implementes equals() y hashCode() en tus clases de notificación.
+        return notifications.stream().distinct().collect(Collectors.toList());
     }
 }

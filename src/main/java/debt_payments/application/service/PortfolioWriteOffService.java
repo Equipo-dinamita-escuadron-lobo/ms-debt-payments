@@ -11,6 +11,7 @@ import debt_payments.application.input.IPortfolioWriteOffCommandUseCase;
 import debt_payments.application.input.IPortfolioWriteOffQueryUseCase;
 import debt_payments.application.output.IInvoiceProviderPort;
 import debt_payments.application.output.IPortfolioWriteOffPersistencePort;
+import debt_payments.application.output.IResourceUsageNotifierPort;
 import debt_payments.domain.exception.PortfolioWriteOffNotFoundException;
 import debt_payments.domain.model.PortfolioWriteOff;
 import debt_payments.domain.model.Replica.InvoiceReplica;
@@ -23,6 +24,7 @@ public class PortfolioWriteOffService implements IPortfolioWriteOffCommandUseCas
     private final IPortfolioWriteOffPersistencePort writeOffPersistencePort;
     private final IInvoiceProviderPort invoiceProviderPort;
     private final IAccountingEventPublisher accountingEventPublisher;
+    private final IResourceUsageNotifierPort resourceUsageNotifier;
 
     @Override
     @Transactional
@@ -37,6 +39,10 @@ public class PortfolioWriteOffService implements IPortfolioWriteOffCommandUseCas
         for (InvoiceReplica invoice : modifiedInvoices) {
             invoiceProviderPort.updateInvoice(invoice);
         }
+
+        // 4. Publicar tercero y centro de costo usados
+        resourceUsageNotifier.notifyAll(writeOff.getUsageNotifications());
+
         return writeOffPersistencePort.save(writeOff);
     }
 

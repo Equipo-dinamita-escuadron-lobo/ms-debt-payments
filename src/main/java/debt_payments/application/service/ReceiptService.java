@@ -13,6 +13,7 @@ import debt_payments.application.input.IReceiptQueryUseCase;
 import debt_payments.application.output.IInvoiceProviderPort;
 import debt_payments.application.output.IReceiptCommandPersistencePort;
 import debt_payments.application.output.IReceiptQueryPersistencePort;
+import debt_payments.application.output.IResourceUsageNotifierPort;
 import debt_payments.domain.exception.ReceiptNotFoundException;
 import debt_payments.domain.model.Receipt;
 import debt_payments.domain.model.ReceiptStatus;
@@ -26,8 +27,8 @@ public class ReceiptService implements IReceiptCommandUseCase, IReceiptQueryUseC
     private final IReceiptCommandPersistencePort receiptCommandPersistencePort;
     private final IReceiptQueryPersistencePort receiptQueryPersistencePort;
     private final IInvoiceProviderPort invoiceProviderPort;
-
     private final IAccountingEventPublisher accountingEventPublisher;
+    private final IResourceUsageNotifierPort resourceUsageNotifier;
 
     /**
      * Creates a new receipt after validating external dependencies and generating a unique receipt code.
@@ -60,6 +61,7 @@ public class ReceiptService implements IReceiptCommandUseCase, IReceiptQueryUseC
 
         //Lineas para publicar el evento de creación
         accountingEventPublisher.publishReceiptCreatedEvent(savedReceipt);
+        resourceUsageNotifier.notifyAll(savedReceipt.getUsageNotifications());
 
         return savedReceipt;
     }

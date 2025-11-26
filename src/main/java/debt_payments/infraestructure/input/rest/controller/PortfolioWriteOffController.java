@@ -72,7 +72,8 @@ public class PortfolioWriteOffController {
             request.getEnterpriseId(),
             request.getThirdId(),
             request.getJustification(),
-            domainDetails
+            domainDetails,
+            request.getCostCenterId()
         );
         
         // 4. Llamar al servicio de aplicación con un objeto de dominio válido
@@ -188,6 +189,7 @@ private PortfolioWriteOffResponse buildEnrichedResponse(PortfolioWriteOff writeO
         .debitAuxiliaryAccount(writeOff.getDebitAuxiliaryAccount())
         .debitAuxiliaryAccountId(writeOff.getDebitAuxiliaryAccountId())
         .thirdId(writeOff.getThirdId())
+        .costCenterId(writeOff.getCostCenterId())
         .status(writeOff.getStatus())
         .enterpriseId(writeOff.getEnterpriseId())
         .details(detailResponses) // Asignar la lista de detalles enriquecidos

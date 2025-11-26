@@ -4,13 +4,13 @@ import java.time.LocalDate;
 import java.util.List;
 
 import debt_payments.domain.enums.WriteOffStatus;
-import lombok.Builder;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
-@Builder
+@RequiredArgsConstructor
 public class PortfolioWriteOffEventDto {
     private Long id;
     private String code;
@@ -22,5 +22,6 @@ public class PortfolioWriteOffEventDto {
     private Long thirdId;
     private WriteOffStatus status;
     private String enterpriseId;
+    private Long costCenterId;
     private List<WriteOffDetailEventDto> details;
 }
