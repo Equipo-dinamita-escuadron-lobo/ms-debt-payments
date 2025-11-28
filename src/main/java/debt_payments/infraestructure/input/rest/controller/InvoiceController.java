@@ -8,13 +8,16 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import debt_payments.application.input.IInvoiceCommandUseCase;
 import debt_payments.application.input.IInvoiceQueryUseCase;
 import debt_payments.domain.enums.InvoiceStatus;
+import debt_payments.domain.model.Replica.InvoiceReplica;
 import debt_payments.infraestructure.input.rest.dto.request.UpdateDueDateRequest;
 import debt_payments.infraestructure.input.rest.dto.response.InvoicePendingResponse;
+import debt_payments.infraestructure.input.rest.dto.response.InvoiceSummaryResponse;
 import debt_payments.infraestructure.input.rest.mapper.IInvoiceRestMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -64,5 +67,18 @@ public class InvoiceController {
             @PathVariable InvoiceStatus status) {
         var invoices = invoiceQueryUseCase.findStatusInvoicesByClientId(clientId, status);
         return ResponseEntity.ok(invoiceRestMapper.toInvoicePendingResponseList(invoices));
+    }
+
+    @GetMapping("/expiring")
+    public ResponseEntity<List<InvoiceSummaryResponse>> getExpiringInvoices(
+            @RequestParam String enterpriseId, 
+            @RequestParam(defaultValue = "5") int days) {
+
+        List<InvoiceReplica> invoices = invoiceQueryUseCase.findExpiringInvoices(enterpriseId, days);
+        
+        // Mapeamos a un DTO resumen para no enviar toda la data pesada
+        List<InvoiceSummaryResponse> response = invoiceRestMapper.toSummaryResponseList(invoices);
+        
+        return ResponseEntity.ok(response);
     }
 }

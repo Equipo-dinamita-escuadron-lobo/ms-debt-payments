@@ -83,4 +83,13 @@ public class InvoiceService implements IInvoiceCommandUseCase, IInvoiceQueryUseC
     public List<InvoiceReplica> findStatusInvoicesByClientId(Long clientId, InvoiceStatus status) {
         return invoiceProviderPort.findStatusInvoicesByClientId(clientId, status);
     }
+
+    @Override
+    public List<InvoiceReplica> findExpiringInvoices(String enterpriseId, int daysThreshold) {
+        LocalDate today = LocalDate.now();
+        LocalDate thresholdDate = today.plusDays(daysThreshold);
+
+        // Buscamos solo las que están PENDIENTES (InvoiceStatus.PENDING)
+        return invoiceProviderPort.findExpiringInvoices(enterpriseId, InvoiceStatus.PENDING, today, thresholdDate);
+    }
 }

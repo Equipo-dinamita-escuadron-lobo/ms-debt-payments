@@ -42,4 +42,12 @@ public interface IInvoiceQueryUseCase {
      * @return La factura encontrada o null si no existe.
      */
     InvoiceReplica findInvoiceById(Long invoiceId);
+
+    /**
+     * Busca facturas pendientes que vencen en los próximos 'days' días.
+     * @param enterpriseId El ID de la empresa.
+     * @param daysThreshold El número de días para el umbral de vencimiento.
+     * @return Una lista de objetos de dominio InvoiceReplica que representan las facturas próximas a vencer.
+     */
+    List<InvoiceReplica> findExpiringInvoices(String enterpriseId, int daysThreshold);
 }
