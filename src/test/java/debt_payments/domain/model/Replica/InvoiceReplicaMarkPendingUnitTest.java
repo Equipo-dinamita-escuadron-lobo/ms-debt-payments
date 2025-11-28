@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import debt_payments.domain.enums.InvoiceStatus;
 import debt_payments.test.fixtures.TestFixtures;
 
-public class InvoiceReplicaMarkPendingTest {
+public class InvoiceReplicaMarkPendingUnitTest {
 
     @Test
     void markAsPendingWriteOff_setsStatusPendingWrittenOff() {
@@ -16,3 +16,4 @@ public class InvoiceReplicaMarkPendingTest {
         assertThat(invoice.getStatus()).isEqualTo(InvoiceStatus.PENDING_WRITTEN_OFF);
     }
 }
+

@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DisplayName("Pruebas Unitarias para InvoiceReplica")
-public class InvoiceReplicaTest {
+public class InvoiceReplicaUnitTest {
 
     @Nested
     @DisplayName("Comportamiento de writeOff")
@@ -131,3 +131,4 @@ public class InvoiceReplicaTest {
         }
     }
 }
+

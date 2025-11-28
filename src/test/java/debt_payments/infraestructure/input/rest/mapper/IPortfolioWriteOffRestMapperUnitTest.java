@@ -18,7 +18,7 @@ import debt_payments.test.fixtures.TestFixtures;
  * Unit tests for MapStruct mapper IPortfolioWriteOffRestMapper.
  */
 @DisplayName("IPortfolioWriteOffRestMapper (MapStruct) tests")
-public class IPortfolioWriteOffRestMapperTest {
+public class IPortfolioWriteOffRestMapperUnitTest {
 
     private final IPortfolioWriteOffRestMapper mapper = new IPortfolioWriteOffRestMapperImpl();
 
@@ -63,3 +63,4 @@ public class IPortfolioWriteOffRestMapperTest {
         assertThat(resp.getDetails()).isNull();
     }
 }
+

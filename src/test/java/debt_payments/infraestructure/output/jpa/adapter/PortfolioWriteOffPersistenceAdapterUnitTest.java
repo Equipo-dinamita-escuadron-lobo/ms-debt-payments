@@ -25,7 +25,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class) // Habilita Mockito, sin contexto de Spring
 @DisplayName("Pruebas Unitarias para PortfolioWriteOffPersistenceAdapter")
-public class PortfolioWriteOffPersistenceAdapterTest {
+public class PortfolioWriteOffPersistenceAdapterUnitTest {
     @Mock 
     private IPortfolioWriteOffRepository portfolioWriteOffRepository;
 
@@ -242,3 +242,4 @@ public class PortfolioWriteOffPersistenceAdapterTest {
     }
 
 }
+

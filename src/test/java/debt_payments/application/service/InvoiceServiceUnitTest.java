@@ -23,7 +23,7 @@ import debt_payments.domain.model.Replica.InvoiceReplica;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit tests for InvoiceService")
-public class InvoiceServiceTest {
+public class InvoiceServiceUnitTest {
 
     @Mock
     private IInvoiceProviderPort invoiceProviderPort;
@@ -139,3 +139,4 @@ public class InvoiceServiceTest {
                 .isInstanceOf(InvoiceNotFoundException.class);
     }
 }
+

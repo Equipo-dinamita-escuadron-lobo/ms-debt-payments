@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import debt_payments.domain.enums.ReceiptType;
 
-public class ReceiptTypeMapperTest {
+public class ReceiptTypeMapperUnitTest {
 
     private final ReceiptTypeMapper mapper = new ReceiptTypeMapper();
 
@@ -36,3 +36,4 @@ public class ReceiptTypeMapperTest {
         assertThat(mapper.toLong(ReceiptType.DIRECT_INCOME)).isEqualTo(ReceiptType.DIRECT_INCOME.getId());
     }
 }
+

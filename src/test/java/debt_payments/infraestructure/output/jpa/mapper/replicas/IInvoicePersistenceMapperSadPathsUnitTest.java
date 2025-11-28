@@ -9,7 +9,7 @@ import debt_payments.domain.model.Replica.InvoiceReplica;
 import debt_payments.infraestructure.output.jpa.entity.replicas.InvoiceReplicaEntity;
 
 @DisplayName("IInvoicePersistenceMapper sad-paths (no Spring)")
-public class IInvoicePersistenceMapperSadPathsTest {
+public class IInvoicePersistenceMapperSadPathsUnitTest {
 
     private final IInvoicePersistenceMapper mapper = new IInvoicePersistenceMapperImpl();
 
@@ -27,3 +27,4 @@ public class IInvoicePersistenceMapperSadPathsTest {
         assertThat(entity).isNull();
     }
 }
+

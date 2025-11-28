@@ -96,6 +96,10 @@ public final class TestFixtures {
     }
 
     public static PortfolioWriteOff portfolioWriteOffWithDetails(String enterpriseId, Long thirdId, String justification, List<WriteOffDetail> details) {
-        return PortfolioWriteOff.create(enterpriseId, thirdId, justification, details);
+        return PortfolioWriteOff.create(enterpriseId, thirdId, justification, details, 1L);
+    }
+
+    public static PortfolioWriteOff portfolioWriteOffWithDetailsAndCostCenter(String enterpriseId, Long thirdId, String justification, List<WriteOffDetail> details, Long costCenterId) {
+        return PortfolioWriteOff.create(enterpriseId, thirdId, justification, details, costCenterId);
     }
 }

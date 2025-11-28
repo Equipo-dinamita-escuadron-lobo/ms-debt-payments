@@ -12,7 +12,7 @@ import debt_payments.infraestructure.output.messageBroker.dto.PortfolioWriteOffE
 import debt_payments.test.fixtures.TestFixtures;
 
 @DisplayName("IPortfolioWriteOffEventMapper (MapStruct) tests")
-public class IPortfolioWriteOffEventMapperTest {
+public class IPortfolioWriteOffEventMapperUnitTest {
 
     private final IPortfolioWriteOffEventMapper mapper = new IPortfolioWriteOffEventMapperImpl();
 
@@ -32,3 +32,4 @@ public class IPortfolioWriteOffEventMapperTest {
         assertThat(dto.getDetails()).isNull();
     }
 }
+

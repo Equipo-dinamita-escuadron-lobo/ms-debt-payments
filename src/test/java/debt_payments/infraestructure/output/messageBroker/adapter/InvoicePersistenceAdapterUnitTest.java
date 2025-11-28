@@ -23,7 +23,7 @@ import debt_payments.test.fixtures.TestFixtures;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("InvoicePersistenceAdapter unit tests")
-public class InvoicePersistenceAdapterTest {
+public class InvoicePersistenceAdapterUnitTest {
 
     @Mock
     IInvoicePersistenceMapper mapper;
@@ -131,3 +131,4 @@ public class InvoicePersistenceAdapterTest {
         assertThat(list).hasSize(1).contains(domain);
     }
 }
+

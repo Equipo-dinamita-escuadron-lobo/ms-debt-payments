@@ -14,7 +14,7 @@ import debt_payments.domain.exception.InvoiceNotFoundException;
 import debt_payments.domain.model.Replica.InvoiceReplica;
 import debt_payments.test.fixtures.TestFixtures;
 
-public class PortfolioWriteOffProcessVoidanceTest {
+public class PortfolioWriteOffProcessVoidanceUnitTest {
 
     @Test
     void processVoidance_reversesWriteOffOnInvoices() {
@@ -42,3 +42,4 @@ public class PortfolioWriteOffProcessVoidanceTest {
                 .isInstanceOf(InvoiceNotFoundException.class);
     }
 }
+

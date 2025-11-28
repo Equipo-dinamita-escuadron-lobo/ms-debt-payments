@@ -11,7 +11,7 @@ import debt_payments.domain.model.Receipt;
 import debt_payments.infraestructure.output.jpa.entity.ReceiptEntity;
 
 @DisplayName("IReceiptPersistenceMapper sad-paths (no Spring)")
-public class IReceiptPersistenceMapperSadPathsTest {
+public class IReceiptPersistenceMapperSadPathsUnitTest {
 
     private final IReceiptPersistenceMapper mapper = new IReceiptPersistenceMapperImpl();
 
@@ -86,3 +86,4 @@ public class IReceiptPersistenceMapperSadPathsTest {
         assertThat(mapper.toDomain((ReceiptEntity) null)).isNull();
     }
 }
+

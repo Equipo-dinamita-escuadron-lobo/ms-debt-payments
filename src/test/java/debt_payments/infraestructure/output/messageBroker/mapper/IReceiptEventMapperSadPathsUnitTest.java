@@ -12,7 +12,7 @@ import debt_payments.infraestructure.output.messageBroker.dto.ReceiptDetailEvent
 import debt_payments.infraestructure.output.messageBroker.dto.ReceiptEventDto;
 import debt_payments.test.fixtures.TestFixtures;
 
-public class IReceiptEventMapperSadPathsTest {
+public class IReceiptEventMapperSadPathsUnitTest {
 
     @Test
     void toEventDto_nullReceipt_returnsNull() {
@@ -67,3 +67,4 @@ public class IReceiptEventMapperSadPathsTest {
         assertThat(impl.toEventDtoDetail(null)).isNull();
     }
 }
+

@@ -21,7 +21,7 @@ import debt_payments.test.fixtures.TestFixtures;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit tests for ReceiptPersistenceAdapter")
-public class ReceiptPersistenceAdapterTest {
+public class ReceiptPersistenceAdapterUnitTest {
 
     @Mock
     private IReceiptRepository receiptRepository;
@@ -90,3 +90,4 @@ public class ReceiptPersistenceAdapterTest {
         assertThat(exists).isTrue();
     }
 }
+

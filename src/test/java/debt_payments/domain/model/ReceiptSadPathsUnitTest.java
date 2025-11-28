@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import debt_payments.test.fixtures.TestFixtures;
 
-public class ReceiptSadPathsTest {
+public class ReceiptSadPathsUnitTest {
 
     @Test
     void createForInvoicePayment_emptyDetails_throws() {
@@ -74,3 +74,4 @@ public class ReceiptSadPathsTest {
         assertThatThrownBy(() -> r.voidReceipt("another", finder)).isInstanceOf(IllegalStateException.class);
     }
 }
+

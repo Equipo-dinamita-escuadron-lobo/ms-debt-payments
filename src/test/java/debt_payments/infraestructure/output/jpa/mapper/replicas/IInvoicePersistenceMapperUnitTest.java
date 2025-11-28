@@ -14,7 +14,7 @@ import debt_payments.domain.enums.InvoiceStatus;
 import debt_payments.infraestructure.output.jpa.entity.replicas.InvoiceReplicaEntity;
 
 @DisplayName("IInvoicePersistenceMapper happy-paths (no Spring)")
-public class IInvoicePersistenceMapperTest {
+public class IInvoicePersistenceMapperUnitTest {
 
     private final IInvoicePersistenceMapper mapper = new IInvoicePersistenceMapperImpl();
 
@@ -78,3 +78,4 @@ public class IInvoicePersistenceMapperTest {
         assertThat(list.get(0).getFactCode()).isEqualTo("7");
     }
 }
+

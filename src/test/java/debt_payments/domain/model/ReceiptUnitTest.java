@@ -14,7 +14,7 @@ import debt_payments.domain.model.Replica.InvoiceReplica;
 import debt_payments.test.fixtures.TestFixtures;
 
 @DisplayName("Unit tests for Receipt domain model")
-public class ReceiptTest {
+public class ReceiptUnitTest {
 
     @Test
     @DisplayName("isInvoicePayment returns true when type is INVOICE_PAYMENT")
@@ -106,4 +106,36 @@ public class ReceiptTest {
         receipt.setStatus(ReceiptStatus.FINALIZED);
         assertThatThrownBy(() -> receipt.voidReceipt("  ", id -> Optional.empty())).isInstanceOf(IllegalArgumentException.class);
     }
+
+    @Test
+    @DisplayName("getUsageNotifications returns third party and payment method notifications for invoice payment")
+    void getUsageNotificationsForInvoicePayment() {
+        var detail = TestFixtures.receiptDetail(1L, 100L);
+        var receipt = TestFixtures.receiptForInvoicePayment("ENT-1", 5L, 10L, "obs", List.of(detail));
+
+        var notifications = receipt.getUsageNotifications();
+
+        assertThat(notifications).hasSize(2);
+        assertThat(notifications).anySatisfy(n -> {
+            assertThat(n.getClass().getSimpleName()).isEqualTo("ThirdPartyUsedNotification");
+        });
+        assertThat(notifications).anySatisfy(n -> {
+            assertThat(n.getClass().getSimpleName()).isEqualTo("PaymentMethodUsedNotification");
+        });
+    }
+
+    @Test
+    @DisplayName("getUsageNotifications includes cost center for direct income with cost center")
+    void getUsageNotificationsIncludesCostCenterForDirectIncome() {
+        var receipt = TestFixtures.receiptForDirectIncome("ENT-1", 5L, 10L, "obs", 1000L, 200L);
+        receipt.setCenterCostId(50L);
+
+        var notifications = receipt.getUsageNotifications();
+
+        assertThat(notifications).hasSize(3);
+        assertThat(notifications).anySatisfy(n -> {
+            assertThat(n.getClass().getSimpleName()).isEqualTo("CostCenterUsedNotification");
+        });
+    }
 }
+

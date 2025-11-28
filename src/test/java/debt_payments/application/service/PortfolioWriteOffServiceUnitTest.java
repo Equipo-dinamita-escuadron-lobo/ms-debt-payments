@@ -3,6 +3,7 @@ package debt_payments.application.service;
 import debt_payments.application.input.IAccountingEventPublisher;
 import debt_payments.application.output.IInvoiceProviderPort;
 import debt_payments.application.output.IPortfolioWriteOffPersistencePort;
+import debt_payments.application.output.IResourceUsageNotifierPort;
 import debt_payments.domain.enums.WriteOffStatus;
 import debt_payments.domain.exception.PortfolioWriteOffNotFoundException;
 import debt_payments.domain.model.PortfolioWriteOff;
@@ -27,7 +28,7 @@ import debt_payments.test.fixtures.TestFixtures;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Pruebas Unitarias para PortfolioWriteOffService")
-public class PortfolioWriteOffServiceTest {
+public class PortfolioWriteOffServiceUnitTest {
     // 1. @Mock: Inyección de dependencias simuladas (falsas).
     @Mock
     private IPortfolioWriteOffPersistencePort writeOffPersistencePort;
@@ -35,6 +36,8 @@ public class PortfolioWriteOffServiceTest {
     private IInvoiceProviderPort invoiceProviderPort;
     @Mock
     private IAccountingEventPublisher accountingEventPublisher;
+    @Mock
+    private IResourceUsageNotifierPort resourceUsageNotifier;
 
     // 2. @InjectMocks: inyecta los mocks en este servicio en la instancia real
     @InjectMocks 
@@ -230,6 +233,73 @@ public class PortfolioWriteOffServiceTest {
             verify(invoiceProviderPort).updateInvoice(mockInvoice);
             verify(writeOffPersistencePort).save(sampleWriteOff);
         }
+
+        @Test
+        @DisplayName("Debe notificar el uso de recursos al crear un castigo")
+        void shouldNotifyResourceUsageWhenCreatingWriteOff() {
+            // ARRANGE
+            InvoiceReplica mockInvoice = mock(InvoiceReplica.class);
+            List<InvoiceReplica> modifiedInvoices = List.of(mockInvoice);
+
+            doReturn(modifiedInvoices).when(sampleWriteOff).prepareInvoicesForWriteOff(any());
+            when(writeOffPersistencePort.save(sampleWriteOff)).thenReturn(sampleWriteOff);
+
+            // ACT
+            portfolioWriteOffService.createWriteOff(sampleWriteOff);
+
+            // ASSERT
+            verify(resourceUsageNotifier).notifyAll(any());
+        }
+
+        @Test
+        @DisplayName("Debe generar código único que comienza con CC-")
+        void shouldGenerateUniqueCodeStartingWithCC() {
+            // ARRANGE
+            var writeOff1 = new PortfolioWriteOff();
+            var writeOff2 = new PortfolioWriteOff();
+            PortfolioWriteOff spyWriteOff1 = spy(writeOff1);
+            PortfolioWriteOff spyWriteOff2 = spy(writeOff2);
+            
+            InvoiceReplica mockInvoice = mock(InvoiceReplica.class);
+            List<InvoiceReplica> modifiedInvoices = List.of(mockInvoice);
+
+            doReturn(modifiedInvoices).when(spyWriteOff1).prepareInvoicesForWriteOff(any());
+            doReturn(modifiedInvoices).when(spyWriteOff2).prepareInvoicesForWriteOff(any());
+            when(writeOffPersistencePort.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+            // ACT
+            PortfolioWriteOff result1 = portfolioWriteOffService.createWriteOff(spyWriteOff1);
+            
+            // Simular una pequeña pausa para asegurar timestamp diferente
+            try { Thread.sleep(5); } catch (InterruptedException e) {}
+            
+            PortfolioWriteOff result2 = portfolioWriteOffService.createWriteOff(spyWriteOff2);
+
+            // ASSERT
+            assertThat(result1.getCode()).startsWith("CC-");
+            assertThat(result2.getCode()).startsWith("CC-");
+            // Los códigos deben ser diferentes debido al timestamp
+            assertThat(result1.getCode()).isNotEqualTo(result2.getCode());
+        }
+
+        @Test
+        @DisplayName("Debe propagar excepciones de persistencia al crear")
+        void shouldPropagateExceptionWhenSavingWriteOff() {
+            // ARRANGE
+            InvoiceReplica mockInvoice = mock(InvoiceReplica.class);
+            List<InvoiceReplica> modifiedInvoices = List.of(mockInvoice);
+
+            doReturn(modifiedInvoices).when(sampleWriteOff).prepareInvoicesForWriteOff(any());
+            when(writeOffPersistencePort.save(sampleWriteOff)).thenThrow(new RuntimeException("DB error"));
+
+            // ACT & ASSERT
+            assertThatThrownBy(() -> portfolioWriteOffService.createWriteOff(sampleWriteOff))
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessageContaining("DB error");
+
+            verify(invoiceProviderPort).updateInvoice(mockInvoice);
+            verify(resourceUsageNotifier).notifyAll(any());
+        }
     }
 
     @Nested
@@ -290,3 +360,4 @@ public class PortfolioWriteOffServiceTest {
         }
     }
 }
+

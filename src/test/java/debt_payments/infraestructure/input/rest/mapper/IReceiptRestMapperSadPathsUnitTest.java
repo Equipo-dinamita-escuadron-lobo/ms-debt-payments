@@ -13,7 +13,7 @@ import debt_payments.infraestructure.input.rest.dto.request.ReceiptCreateRequest
 import debt_payments.infraestructure.input.rest.dto.response.ReceiptResponse;
 
 @DisplayName("IReceiptRestMapper sad-paths (no Spring)")
-public class IReceiptRestMapperSadPathsTest {
+public class IReceiptRestMapperSadPathsUnitTest {
 
     private IReceiptRestMapper createMapperWithHelper() throws Exception {
         IReceiptRestMapperImpl impl = new IReceiptRestMapperImpl();
@@ -101,3 +101,4 @@ public class IReceiptRestMapperSadPathsTest {
         assertThat(resp.getDetails()).isNull();
     }
 }
+

@@ -14,7 +14,7 @@ import debt_payments.infraestructure.output.jpa.entity.WriteOffDetailEntity;
 import debt_payments.test.fixtures.TestFixtures;
 
 @DisplayName("IPortfolioWriteOffPersistenceMapper (MapStruct) tests")
-public class IPortfolioWriteOffPersistenceMapperTest {
+public class IPortfolioWriteOffPersistenceMapperUnitTest {
 
     private final IPortfolioWriteOffPersistenceMapper mapper = new IPortfolioWriteOffPersistenceMapperImpl();
 
@@ -69,3 +69,4 @@ public class IPortfolioWriteOffPersistenceMapperTest {
         assertThat(detail.getAccountingAccount()).isEqualTo(400L);
     }
 }
+

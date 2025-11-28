@@ -16,7 +16,7 @@ import debt_payments.infraestructure.output.messageBroker.dto.ReceiptDetailEvent
 import debt_payments.infraestructure.output.messageBroker.dto.ReceiptEventDto;
 
 @DisplayName("IReceiptEventMapper happy-paths")
-public class IReceiptEventMapperTest {
+public class IReceiptEventMapperUnitTest {
 
     private final IReceiptEventMapperImpl impl = new IReceiptEventMapperImpl();
 
@@ -72,3 +72,4 @@ public class IReceiptEventMapperTest {
         assertThat(detail.getAccountingAccount()).isEqualTo(900L);
     }
 }
+

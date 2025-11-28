@@ -20,7 +20,7 @@ import debt_payments.test.fixtures.TestFixtures;
 @ExtendWith(SpringExtension.class)
 @Import({IReceiptRestMapperImpl.class, ReceiptTypeMapper.class})
 @DisplayName("IReceiptRestMapper (MapStruct) tests")
-public class IReceiptRestMapperTest {
+public class IReceiptRestMapperUnitTest {
 
     @Autowired
     private IReceiptRestMapper mapper;
@@ -62,3 +62,4 @@ public class IReceiptRestMapperTest {
         assertThat(resp.getDetails()).hasSize(1);
     }
 }
+

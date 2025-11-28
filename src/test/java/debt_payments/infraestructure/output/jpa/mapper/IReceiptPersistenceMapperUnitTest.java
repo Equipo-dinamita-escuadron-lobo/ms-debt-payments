@@ -20,7 +20,7 @@ import debt_payments.infraestructure.output.jpa.entity.ReceiptDetailEntity;
 import debt_payments.infraestructure.output.jpa.entity.ReceiptEntity;
 
 @DisplayName("IReceiptPersistenceMapper happy-paths (no Spring)")
-public class IReceiptPersistenceMapperTest {
+public class IReceiptPersistenceMapperUnitTest {
 
     private final IReceiptPersistenceMapper mapper = new IReceiptPersistenceMapperImpl();
 
@@ -107,4 +107,5 @@ public class IReceiptPersistenceMapperTest {
     }
 
 }
+
 
