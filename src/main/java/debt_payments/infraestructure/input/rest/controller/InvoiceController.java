@@ -77,6 +77,7 @@ public class InvoiceController {
         List<InvoiceReplica> invoices = invoiceQueryUseCase.findExpiringInvoices(enterpriseId, days);
         
         // Mapeamos a un DTO resumen para no enviar toda la data pesada
+        //Esta monda no se desplego en produccion
         List<InvoiceSummaryResponse> response = invoiceRestMapper.toSummaryResponseList(invoices);
         
         return ResponseEntity.ok(response);
