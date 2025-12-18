@@ -6,12 +6,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import debt_payments.application.input.IInvoiceCommandUseCase;
+import debt_payments.application.input.IInvoiceNotificationUseCase;
 import debt_payments.application.input.IInvoiceQueryUseCase;
 import debt_payments.domain.enums.InvoiceStatus;
 import debt_payments.domain.model.Replica.InvoiceReplica;
@@ -29,6 +31,7 @@ public class InvoiceController {
     private final IInvoiceQueryUseCase invoiceQueryUseCase;
     private final IInvoiceCommandUseCase invoiceCommandUseCase;
     private final IInvoiceRestMapper invoiceRestMapper;
+    private final IInvoiceNotificationUseCase invoiceNotificationUseCase;
 
     @GetMapping("/invoices/{invoiceId}")
     public ResponseEntity<InvoicePendingResponse> getInvoiceById(@PathVariable Long invoiceId) {
@@ -80,5 +83,19 @@ public class InvoiceController {
         List<InvoiceSummaryResponse> response = invoiceRestMapper.toSummaryResponseList(invoices);
         
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/trigger-reminders")
+    public ResponseEntity<String> triggerInvoiceReminders() {
+        try {
+            // Llamamos exactamente al mismo método que usa el scheduler. ¡No duplicamos lógica!
+            invoiceNotificationUseCase.processAndPublishDueInvoices(); 
+            
+            String message = "Proceso de envío de recordatorios iniciado. Revisa los logs de ms_debt_payments y ms_notifications para ver el progreso.";
+            return ResponseEntity.ok(message);
+        } catch (Exception e) {
+            String errorMessage = "Error al iniciar el proceso de recordatorios: " + e.getMessage();
+            return ResponseEntity.internalServerError().body(errorMessage);
+        }
     }
 }

@@ -74,4 +74,11 @@ public interface IInvoiceProviderPort {
      * @return Una lista de objetos de dominio InvoiceReplica que representan las facturas que cumplen con los criterios.
      */
     List<InvoiceReplica> findExpiringInvoices(String enterpriseId, InvoiceStatus status, LocalDate startDate, LocalDate endDate);
+
+    /**
+     * Busca facturas que vencen en una fecha específica.
+     * @param dueDate La fecha de vencimiento objetivo.
+     * @return Una lista de objetos de dominio InvoiceReplica que representan las facturas que vencen en la fecha dada.
+     */
+    List<InvoiceReplica> findInvoicesByExpirationDate(LocalDate expirationLocalDate);
 }
