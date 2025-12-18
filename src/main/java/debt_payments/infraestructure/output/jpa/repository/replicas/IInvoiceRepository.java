@@ -67,4 +67,11 @@ public interface IInvoiceRepository extends JpaRepository<InvoiceReplicaEntity, 
         LocalDate start, 
         LocalDate end
     );
+
+    /**
+     * Find invoices by expiration date.
+     * @param expirationDate The expiration date to filter invoices.
+     * @return A list of InvoiceReplicaEntity that match the expiration date.
+     */
+    List<InvoiceReplicaEntity> findByExpirationDate(LocalDate expirationDate);
 }
