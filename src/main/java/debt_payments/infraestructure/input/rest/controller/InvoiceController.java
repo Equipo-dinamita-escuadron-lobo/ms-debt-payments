@@ -19,7 +19,6 @@ import debt_payments.domain.enums.InvoiceStatus;
 import debt_payments.domain.model.Replica.InvoiceReplica;
 import debt_payments.infraestructure.input.rest.dto.request.UpdateDueDateRequest;
 import debt_payments.infraestructure.input.rest.dto.response.InvoicePendingResponse;
-import debt_payments.infraestructure.input.rest.dto.response.InvoiceSummaryResponse;
 import debt_payments.infraestructure.input.rest.mapper.IInvoiceRestMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -73,14 +72,15 @@ public class InvoiceController {
     }
 
     @GetMapping("/expiring")
-    public ResponseEntity<List<InvoiceSummaryResponse>> getExpiringInvoices(
+    public ResponseEntity<List<InvoicePendingResponse>> getExpiringInvoices(
             @RequestParam String enterpriseId, 
             @RequestParam(defaultValue = "5") int days) {
 
         List<InvoiceReplica> invoices = invoiceQueryUseCase.findExpiringInvoices(enterpriseId, days);
         
         // Mapeamos a un DTO resumen para no enviar toda la data pesada
-        List<InvoiceSummaryResponse> response = invoiceRestMapper.toSummaryResponseList(invoices);
+        //Esta monda no se desplego en produccion
+        List<InvoicePendingResponse> response = invoiceRestMapper.toInvoicePendingResponseList(invoices);
         
         return ResponseEntity.ok(response);
     }
