@@ -117,4 +117,22 @@ public class InvoicePersistenceAdapter implements IInvoiceProviderPort {
         return invoiceMapper.toInvoiceReplicaList(invoiceEntityList);
     }
 
+    @Override
+    public List<InvoiceReplica> findExpiringInvoices(String enterpriseId, InvoiceStatus status, LocalDate startDate,
+            LocalDate endDate) {
+        List<InvoiceReplicaEntity> entities = invoiceRepository.findByEntIdAndStatusAndExpirationDateBetween(
+            enterpriseId, 
+            status, 
+            startDate, 
+            endDate
+        );
+        return invoiceMapper.toInvoiceReplicaList(entities);
+    }
+
+    @Override
+    public List<InvoiceReplica> findInvoicesByExpirationDate(LocalDate expirationLocalDate) {
+        List<InvoiceReplicaEntity> entities = invoiceRepository.findByExpirationDate(expirationLocalDate);
+        return invoiceMapper.toInvoiceReplicaList(entities);
+    }
+
 }

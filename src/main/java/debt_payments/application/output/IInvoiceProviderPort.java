@@ -1,5 +1,6 @@
 package debt_payments.application.output;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -62,4 +63,22 @@ public interface IInvoiceProviderPort {
      * @return Una lista de objetos de dominio InvoiceReplica que representan las facturas con el estado especificado del cliente.
      */
     List<InvoiceReplica> findStatusInvoicesByClientId(Long clientId, InvoiceStatus status);
+
+    /**
+     * Busca facturas de una empresa con un estado específico y cuya fecha de vencimiento
+     * esté dentro de un rango dado. 
+     * @param enterpriseId El ID de la empresa.
+     * @param status El estado de las facturas a filtrar.
+     * @param startDate La fecha de inicio del rango (inclusive).
+     * @param endDate La fecha de fin del rango (inclusive).
+     * @return Una lista de objetos de dominio InvoiceReplica que representan las facturas que cumplen con los criterios.
+     */
+    List<InvoiceReplica> findExpiringInvoices(String enterpriseId, InvoiceStatus status, LocalDate startDate, LocalDate endDate);
+
+    /**
+     * Busca facturas que vencen en una fecha específica.
+     * @param dueDate La fecha de vencimiento objetivo.
+     * @return Una lista de objetos de dominio InvoiceReplica que representan las facturas que vencen en la fecha dada.
+     */
+    List<InvoiceReplica> findInvoicesByExpirationDate(LocalDate expirationLocalDate);
 }
