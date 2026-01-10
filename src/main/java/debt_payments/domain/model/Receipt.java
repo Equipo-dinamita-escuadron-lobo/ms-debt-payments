@@ -131,7 +131,7 @@ public class Receipt implements ResourceUsageProvider {
                             "Invoice with id " + detail.getInvoiceId() + " not found."));
 
             // Delegamos la lógica de aplicar el pago a la factura
-            invoice.applyPayment(detail.getAmountPaid());
+            invoice.applyPayment(Long.valueOf(detail.getAmountPaid()));
 
             // Completamos el detalle con info de la factura
             detail.setInvoiceCode(invoice.getFactCode());
