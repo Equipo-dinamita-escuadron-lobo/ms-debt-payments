@@ -13,7 +13,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * DTO para el cuerpo de la petición (request body) al crear un nuevo registro de castigo de cartera.
+ * DTO for request body when creating a portfolio write-off
  */
 @Getter
 @Setter

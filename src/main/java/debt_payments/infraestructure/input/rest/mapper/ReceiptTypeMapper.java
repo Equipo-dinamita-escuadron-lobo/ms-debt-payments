@@ -4,6 +4,10 @@ import org.springframework.stereotype.Component;
 
 import debt_payments.domain.enums.ReceiptType;
 
+/**
+ * Mapper for converting between ReceiptType enum and its corresponding ID.
+ */
+
 @Component
 public class ReceiptTypeMapper {
     public ReceiptType toReceiptType(Long id) {

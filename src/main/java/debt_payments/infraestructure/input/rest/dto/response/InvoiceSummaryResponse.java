@@ -7,8 +7,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * DTO que contiene un resumen de la información de una factura.
- * Se usará para enriquecer la respuesta del castigo de cartera.
+ * DTO that contains a summary of an invoice
+ * This DTO is used to enrich the response of write-off operations with invoice details
  */
 @Getter
 @Setter

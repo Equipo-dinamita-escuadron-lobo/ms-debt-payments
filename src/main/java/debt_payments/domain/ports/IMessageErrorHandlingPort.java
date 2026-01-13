@@ -1,12 +1,5 @@
 package debt_payments.domain.ports;
 
-//Documentación en español
-/**
- * Puerto de salida para el manejo de errores en el procesamiento de mensajes
- * Proporciona un mecanismo para persistir información de errores cuando
- * las operaciones de procesamiento de mensajes fallan, permitiendo auditoría y depuración.
- */
-
 /**
  * @brief Output port for message processing error handling
  * 

@@ -9,6 +9,11 @@ import org.springframework.context.annotation.Profile;
 
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * @brief Config RabbitMQ for communication with Account Service, this is used to receive used accounts
+ * Declares exchanges, queues and bindings
+ */
+
 @Configuration
 @Slf4j
 @Profile("!test")

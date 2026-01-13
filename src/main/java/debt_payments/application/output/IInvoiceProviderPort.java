@@ -12,73 +12,71 @@ public interface IInvoiceProviderPort {
     Optional<Long> getInvoiceBalance(Long invoiceId);
 
     /**
-     * Busca una factura por su ID.
-     * @param invoiceId El ID de la factura a buscar.
-     * @return Un Optional que contiene el objeto de dominio InvoiceReplica si se encuentra, o un Optional vacío si no.
+     * @brief Find an invoice by its ID.
+     * @param invoiceId The ID of the invoice to find.
+     * @return An Optional containing the InvoiceReplica domain object if found, or an empty Optional if not.
      */
     Optional<InvoiceReplica> findInvoiceById(Long invoiceId);
 
     /**
-     * Actualiza una factura en la base de datos.
-     * @param invoice El objeto de dominio InvoiceReplica con los datos actualizados.
+     * @brief Updates an invoice in the database.
+     * @param invoice The InvoiceReplica domain object with updated data.
      */
     void updateInvoice(InvoiceReplica invoice);
 
     /**
-     * Obtiene una lista de facturas con saldo pendiente para un cliente específico.
-     *
-     * @param clientId El ID del cliente.
-     * @return Lista de modelos de dominio de InvoiceReplica.
+     * @brief Obtains a list of invoices with pending balance for a specific client.
+     * @param clientId The ID of the client.
+     * @return A list of InvoiceReplica domain models.
      */
     List<InvoiceReplica> findPendingInvoicesByClientId(Long clientId);
 
     /**
-     * Busca una lista de facturas por sus IDs.
-     * Este método es crucial para poder procesar el castigo de varias facturas de forma eficiente.
-     *
-     * @param invoiceIds Lista de IDs de las facturas a buscar.
-     * @return Una lista de objetos de dominio InvoiceReplica que fueron encontrados.
-     *         Si un ID no corresponde a ninguna factura, simplemente no será incluido en la lista de resultados.
+     * @brief Finds a list of invoices by their IDs.
+     * This method is crucial for efficiently processing the write-off of multiple invoices.
+     * @param invoiceIds List of invoice IDs to find.
+     * @return A list of InvoiceReplica domain objects that were found.
+     *         If an ID does not correspond to any invoice, it will simply not be included in the result list.
      */
     List<InvoiceReplica> findInvoicesByIds(List<Long> invoiceIds);
 
     /**
-     * Busca una lista de facturas por el ID de la empresa.
-     * @param enterpriseId El ID de la empresa.
-     * @return Una lista de objetos de dominio InvoiceReplica que pertenecen a la empresa especificada.
+     * @brief Finds a list of invoices by the enterprise ID.
+     * @param enterpriseId The ID of the enterprise.
+     * @return A list of InvoiceReplica domain objects that belong to the specified enterprise.
      */
     List<InvoiceReplica> findInvoicesByEnterpriseId(String enterpriseId);
 
     /**
-     * Busca una lista de facturas pendientes por el ID de la empresa.
-     * @param enterpriseId El ID de la empresa.
-     * @return Una lista de objetos de dominio InvoiceReplica que están pendientes.
+     * @brief Finds a list of pending invoices by the enterprise ID.
+     * @param enterpriseId The ID of the enterprise.
+     * @return A list of InvoiceReplica domain objects that are pending.
      */
     List<InvoiceReplica> findPendingInvoicesByEnterpriseId(String enterpriseId);
 
     /**
-     * Busca facturas por Id de cliente y estado.
-     * @param clientId El ID del cliente.
-     * @param status El estado de las facturas a filtrar.
-     * @return Una lista de objetos de dominio InvoiceReplica que representan las facturas con el estado especificado del cliente.
+     * @brief Finds invoices by client ID and status.
+     * @param clientId The ID of the client.
+     * @param status The status of the invoices to filter.
+     * @return A list of InvoiceReplica domain objects representing the invoices with the specified status for the client.
      */
     List<InvoiceReplica> findStatusInvoicesByClientId(Long clientId, InvoiceStatus status);
 
     /**
-     * Busca facturas de una empresa con un estado específico y cuya fecha de vencimiento
-     * esté dentro de un rango dado. 
-     * @param enterpriseId El ID de la empresa.
-     * @param status El estado de las facturas a filtrar.
-     * @param startDate La fecha de inicio del rango (inclusive).
-     * @param endDate La fecha de fin del rango (inclusive).
-     * @return Una lista de objetos de dominio InvoiceReplica que representan las facturas que cumplen con los criterios.
+     * @brief Finds invoices of an enterprise with a specific status and whose expiration date
+     * is within a given range. 
+     * @param enterpriseId The ID of the enterprise.
+     * @param status The status of the invoices to filter.
+     * @param startDate The start date of the range (inclusive).
+     * @param endDate The end date of the range (inclusive).
+     * @return A list of InvoiceReplica domain objects representing the invoices that meet the criteria.
      */
     List<InvoiceReplica> findExpiringInvoices(String enterpriseId, InvoiceStatus status, LocalDate startDate, LocalDate endDate);
 
     /**
-     * Busca facturas que vencen en una fecha específica.
-     * @param dueDate La fecha de vencimiento objetivo.
-     * @return Una lista de objetos de dominio InvoiceReplica que representan las facturas que vencen en la fecha dada.
+     * @brief Finds invoices that expire on a specific date.
+     * @param expirationLocalDate The target expiration date.
+     * @return A list of InvoiceReplica domain objects representing the invoices that expire on the given date.
      */
     List<InvoiceReplica> findInvoicesByExpirationDate(LocalDate expirationLocalDate);
 }

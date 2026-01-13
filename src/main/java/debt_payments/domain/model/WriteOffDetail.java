@@ -4,6 +4,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * @brief Represents a detail line for a write-off, linking to an invoice and the amount written off.
+ */
 @Getter
 @Setter
 @Builder

@@ -15,13 +15,7 @@ import lombok.RequiredArgsConstructor;
 
 /**
  * Persistence Adapter for Receipts.
- * This class implements the output ports for persistence and acts as a bridge
- * between the application layer and the JPA-based persistence technology.
- *
- * Adaptador de Persistencia para Recibos.
- * Esta clase implementa los puertos de salida para la persistencia y actúa como
- * un puente
- * entre la capa de aplicación y la tecnología de persistencia basada en JPA.
+ * This class implements the output ports for persistence and acts as a bridge between the application layer and the JPA-based persistence technology.
  */
 @Repository
 @RequiredArgsConstructor

@@ -16,6 +16,10 @@ import debt_payments.infraestructure.output.jpa.repository.replicas.IInvoiceRepo
 import debt_payments.infraestructure.output.messageBroker.dto.InvoiceSyncDto;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Adapter class responsible for handling invoice persistence operations.
+ * It implements the IInvoiceProviderPort interface.
+ */
 @Component
 @RequiredArgsConstructor
 public class InvoicePersistenceAdapter implements IInvoiceProviderPort {
@@ -54,23 +58,12 @@ public class InvoicePersistenceAdapter implements IInvoiceProviderPort {
         return invoiceEntityOptional.map(InvoiceReplicaEntity::getPendingValue);
     }
 
-    /**
-     * Busca una factura por su ID en la base de datos.
-     * @param invoiceId El ID de la factura a buscar.
-     * @return Un Optional que contiene el objeto de dominio InvoiceReplica si se encuentra,
-     *         o un Optional vacío si no.
-     */
-    //@Transactional(readOnly = true) // Es una operación de solo lectura
     @Override
     public Optional<InvoiceReplica> findInvoiceById(Long invoiceId) {
         Optional<InvoiceReplicaEntity> entityOptional = invoiceRepository.findById(invoiceId);
         return entityOptional.map(invoiceMapper::toDomain);
     }
 
-    /**
-     * Actualiza una factura en la base de datos.
-     * @param invoice El objeto de dominio InvoiceReplica con los datos actualizados.
-     */
     @Override
     public void updateInvoice(InvoiceReplica invoice) {
         InvoiceReplicaEntity invoiceToUpdate = invoiceRepository.getReferenceById(invoice.getId());
@@ -82,11 +75,6 @@ public class InvoicePersistenceAdapter implements IInvoiceProviderPort {
         invoiceRepository.save(invoiceToUpdate);
     }
 
-    /**
-     * Busca facturas pendientes por el ID del cliente.
-     * @param clientId El ID del cliente.
-     * @return Una lista de objetos de dominio InvoiceReplica que representan las facturas pendientes del cliente.
-     */
     @Override
     public List<InvoiceReplica> findPendingInvoicesByClientId(Long clientId) {
         var invoiceEntityList = invoiceRepository.findByThirdIdAndPendingValueGreaterThan(clientId, 0L);

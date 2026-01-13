@@ -6,11 +6,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import debt_payments.infraestructure.output.jpa.entity.PortfolioWriteOffEntity;
 
+/**
+ * @brief Repository interface for managing Portfolio Write-Off entities.
+ * This interface extends JpaRepository to provide CRUD operations for PortfolioWriteOffEntity.
+ */
 public interface IPortfolioWriteOffRepository extends JpaRepository<PortfolioWriteOffEntity, Long> {
     /**
-     * Busca todos los registros de castigo asociados a un ID de empresa.
-     * @param enterpriseId El ID de la empresa.
-     * @return Una lista de entidades de castigo.
+     * Finds all portfolio write-offs associated with a specific enterprise ID.
+     * @param enterpriseId The ID of the enterprise.
+     * @return A list of portfolio write-off entities.
      */
     List<PortfolioWriteOffEntity> findByEnterpriseId(String enterpriseId);
 }

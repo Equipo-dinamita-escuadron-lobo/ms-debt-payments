@@ -43,12 +43,15 @@ public class Receipt implements ResourceUsageProvider {
     private Long centerCostId;
     private List<ReceiptDetail> details;
 
+    /**
+     * @brief Check if the receipt is of type invoice payment.
+     */
     public boolean isInvoicePayment() {
         return this.receiptType != null && this.receiptType.getId().equals(ReceiptType.INVOICE_PAYMENT.getId());
     }
 
     /**
-     * Method to create a receipt for invoice payment.
+     * @brief Method to create a receipt for invoice payment.
      * 
      * @param enterpriseId    ID of the enterprise
      * @param thirdPartyId    ID of the third party
@@ -76,7 +79,7 @@ public class Receipt implements ResourceUsageProvider {
     }
 
     /**
-     * Fabric to create a receipt for direct income.
+     * @brief Factory to create a receipt for direct income.
      * 
      * @param enterpriseId    ID of the enterprise
      * @param thirdPartyId    ID of the third party
@@ -110,7 +113,7 @@ public class Receipt implements ResourceUsageProvider {
     }
 
     /**
-     * Apply payments from the receipt details to the corresponding invoices.
+     * @brief Apply payments from the receipt details to the corresponding invoices.
      * 
      * @param invoiceFinder A function that knows how to find an invoice by its ID.
      * @return A list of modified invoices that need to be persisted.
@@ -142,7 +145,7 @@ public class Receipt implements ResourceUsageProvider {
     }
 
     /**
-     * Void the receipt, reversing its effects on associated invoices if applicable.
+     * @brief Void the receipt, reversing its effects on associated invoices if applicable.
      * 
      * @param reason        The reason for voiding the receipt.
      * @param invoiceFinder A function that knows how to find an invoice by its ID.
@@ -178,6 +181,10 @@ public class Receipt implements ResourceUsageProvider {
         return modifiedInvoices;
     }
 
+    /**
+     * @brief Assign a unique code to the receipt.
+     * @param code The unique code to assign.
+     */
     public void assignReceiptCode(String code) {
         if (this.receiptCode != null) {
             throw new IllegalStateException("Receipt code is already assigned.");
@@ -185,6 +192,9 @@ public class Receipt implements ResourceUsageProvider {
         this.receiptCode = code;
     }
 
+    /** 
+     * @brief Calculate the total amount from the receipt details.
+     */
     private void calculateTotalFromDetails() {
         if (this.receiptType == ReceiptType.INVOICE_PAYMENT) {
             this.totalAmount = this.details.stream()
@@ -216,7 +226,6 @@ public class Receipt implements ResourceUsageProvider {
 
         // 4. Cuentas Contables principales ya no es necesario
         
-        // Puedes aplicar un .distinct() si lo necesitas, pero tendrías que implementar equals/hashCode en las clases de notificación.
         return notifications;
     }
 }

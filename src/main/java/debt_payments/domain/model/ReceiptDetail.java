@@ -5,6 +5,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * @brief Represents a detail line in a receipt, linking to an invoice and the amount paid.
+ */
 @Getter
 @Setter
 @AllArgsConstructor

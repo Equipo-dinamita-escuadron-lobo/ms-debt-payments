@@ -4,6 +4,10 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
+
+/**
+ * @brief DTO for request body when voiding a receipt
+ */
 @Getter
 @Setter
 public class VoidReceiptRequest {

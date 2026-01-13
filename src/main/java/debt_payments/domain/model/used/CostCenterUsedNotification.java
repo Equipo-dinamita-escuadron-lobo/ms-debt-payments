@@ -5,6 +5,10 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
+/**
+ * @brief Notification class indicating that a cost center is being used.
+ * This class implements the ResourceUsageNotification interface and contains the ID of the cost center and the associated enterprise ID.
+ */
 @RequiredArgsConstructor
 @Getter
 @Setter

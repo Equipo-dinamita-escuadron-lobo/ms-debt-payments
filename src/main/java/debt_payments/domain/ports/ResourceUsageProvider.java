@@ -4,8 +4,8 @@ import java.util.List;
 
 public interface ResourceUsageProvider {
     /**
-     * Retorna una lista de "intenciones de notificación" por los recursos que esta entidad utiliza.
-     * @return Una lista de objetos que implementan ResourceUsageNotification.
+     * Return a list of resource usage notifications.
+     * @return A list of objects implementing ResourceUsageNotification.
      */
     List<ResourceUsageNotification> getUsageNotifications();
 }

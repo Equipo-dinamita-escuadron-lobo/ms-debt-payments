@@ -5,13 +5,13 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * DTO que representa un detalle de castigo en la respuesta, enriquecido con
- * información de la factura.
+ * DTO that contains details of a write-off operation
+ * This DTO includes the amount written off and a summary of the associated invoice
  */
 @Getter
 @Setter
 @Builder
 public class WriteOffDetailResponse {
-    private Long amountWrittenOff; // El monto que fue castigado
-    private InvoiceSummaryResponse invoice; // El resumen de la factura
+    private Long amountWrittenOff; 
+    private InvoiceSummaryResponse invoice; 
 }

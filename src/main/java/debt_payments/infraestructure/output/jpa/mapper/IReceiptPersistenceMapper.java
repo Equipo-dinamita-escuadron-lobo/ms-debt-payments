@@ -12,16 +12,19 @@ import debt_payments.domain.model.ReceiptDetail;
 import debt_payments.infraestructure.output.jpa.entity.ReceiptDetailEntity;
 import debt_payments.infraestructure.output.jpa.entity.ReceiptEntity;
 
+
+/**
+ * Mapper interface for converting between Receipt domain models and Receipt JPA entities.
+ * Utilizes MapStruct for automatic generation of mapping implementations.
+ */
 @Mapper(componentModel = "spring", 
-        unmappedTargetPolicy = ReportingPolicy.IGNORE) // Ignora advertencias si no todos los campos se mapean
+        unmappedTargetPolicy = ReportingPolicy.IGNORE) 
 public interface IReceiptPersistenceMapper {
 
-    //@Mapping(source = "receiptTypeId", target = "receiptType")
     Receipt toDomain(ReceiptEntity entity);
     List<Receipt> toDomainList(List<ReceiptEntity> entityList);
     ReceiptDetail toDomain(ReceiptDetailEntity detailEntity);
 
-    //@Mapping(source = "receiptType.id", target = "receiptTypeId")
     ReceiptEntity toEntity(Receipt domain);
     ReceiptDetailEntity toEntity(ReceiptDetail detailDomain);
     List<ReceiptEntity> toEntityList(List<Receipt> domainList);

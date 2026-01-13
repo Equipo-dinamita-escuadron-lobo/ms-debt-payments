@@ -7,6 +7,10 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * @brief DTO for request body when creating a receipt
+ */
+
 @Getter
 @Setter
 public class ReceiptCreateRequest {

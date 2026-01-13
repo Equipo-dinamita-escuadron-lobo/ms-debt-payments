@@ -17,6 +17,14 @@ import debt_payments.domain.model.PortfolioWriteOff;
 import debt_payments.domain.model.Replica.InvoiceReplica;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * @brief Service class for managing portfolio write-offs.
+ * This class implements both command and query use cases for portfolio write-offs,
+ * handling creation, confirmation, voidance, and retrieval operations.
+ * It orchestrates interactions between the domain model and various persistence
+ * and notification ports.
+ */
+
 @Service
 @RequiredArgsConstructor
 public class PortfolioWriteOffService implements IPortfolioWriteOffCommandUseCase, IPortfolioWriteOffQueryUseCase {

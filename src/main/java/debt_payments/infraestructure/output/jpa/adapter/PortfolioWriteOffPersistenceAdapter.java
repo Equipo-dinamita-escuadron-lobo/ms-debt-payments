@@ -12,6 +12,11 @@ import debt_payments.infraestructure.output.jpa.mapper.IPortfolioWriteOffPersist
 import debt_payments.infraestructure.output.jpa.repository.IPortfolioWriteOffRepository;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Persistence adapter for managing Portfolio Write-Offs.
+ * Implements the IPortfolioWriteOffPersistencePort interface to provide CRUD operations for Portfolio Write-Off entities using JPA.
+ */
+
 @Component
 @RequiredArgsConstructor
 public class PortfolioWriteOffPersistenceAdapter implements IPortfolioWriteOffPersistencePort {

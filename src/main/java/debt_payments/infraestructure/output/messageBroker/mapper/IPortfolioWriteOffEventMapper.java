@@ -7,6 +7,9 @@ import org.mapstruct.ReportingPolicy;
 import debt_payments.domain.model.PortfolioWriteOff;
 import debt_payments.infraestructure.output.messageBroker.dto.PortfolioWriteOffEventDto;
 
+/**
+ * @brief Mapper interface for converting PortfolioWriteOff domain models to PortfolioWriteOffEventDto.
+ */
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface IPortfolioWriteOffEventMapper {
 

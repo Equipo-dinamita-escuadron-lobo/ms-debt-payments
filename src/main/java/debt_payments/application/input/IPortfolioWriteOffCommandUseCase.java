@@ -8,23 +8,23 @@ import debt_payments.domain.model.PortfolioWriteOff;
 public interface IPortfolioWriteOffCommandUseCase {
 
     /**
-     * Crea un nuevo registro de castigo.
-     * @param writeOff El objeto de dominio a crear (ya validado).
-     * @return El modelo de dominio del castigo creado.
+     * Create a new portfolio write-off.
+     * @param writeOff The domain object to create (already validated).
+     * @return The created portfolio write-off domain model.
      */
     PortfolioWriteOff createWriteOff(PortfolioWriteOff writeOff);
 
     /**
-     * Confirma un castigo de cartera existente.
-     * @param writeOffId El ID del castigo a confirmar.
-     * @return El modelo de dominio del castigo actualizado.
+     * Confirm an existing portfolio write-off.
+     * @param writeOffId The ID of the write-off to confirm.
+     * @return The updated portfolio write-off domain model.
      */
     PortfolioWriteOff confirmWriteOff(Long writeOffId);
 
     /**
-     * Anula la confirmación de un castigo de cartera.
-     * @param writeOffId El ID del castigo a anular.
-     * @return El modelo de dominio del castigo actualizado.
+     * Void the confirmation of a portfolio write-off.
+     * @param writeOffId The ID of the write-off to void.
+     * @return The updated portfolio write-off domain model.
      */
     PortfolioWriteOff voidWriteOffConfirmation(Long writeOffId);
 }
