@@ -8,6 +8,7 @@ import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
+import debt_payments.domain.exception.ValidationException;
 import debt_payments.domain.ports.IEventRecoveryActionPort;
 import debt_payments.domain.ports.IMessageErrorHandlingPort;
 import debt_payments.infraestructure.config.RabbitConfig;
@@ -98,63 +99,42 @@ public class InvoiceEventListener extends AbstractMessageListener<EventDto<Invoi
      * @return True if event is valid, false otherwise
      */
     @Override
-    protected boolean isValidEvent(EventDto<InvoiceSyncDto> event) {
+    protected void validateEvent(EventDto<InvoiceSyncDto> event) throws ValidationException {
         if (event == null) {
-            log.warn("Event is null");
-            return false;
+            throw new ValidationException("Validation failed: Event is null");
         }
         if (event.getData() == null) {
-            log.warn("Event data is null");
-            return false;
+            throw new ValidationException("Validation failed: Event data is null");
         }
         if (event.getType() == null) {
-            log.warn("Event type is null");
-            return false;
+            throw new ValidationException("Validation failed: Event type is null");
         }
 
-        // Validar campos obligatorios
         InvoiceSyncDto data = event.getData();
         if (data.getFactCode() == null) {
-            log.warn("FactCode is null");
-            return false;
+            throw new ValidationException("Validation failed: FactCode is null");
         }
-
         if (data.getAccountingAccount() == null) {
-            log.warn("AccountingAccount is null");
-            return false;
+            throw new ValidationException("Validation failed: AccountingAccount is null");
         }
-
         if (data.getEntId() == null) {
-            log.warn("EnterpriseId is null");
-            return false;
+            throw new ValidationException("Validation failed: EntId is null");
         }
-
         if (data.getExpirationDate() == null) {
-            log.warn("ExpirationDate is null");
-            return false;
+            throw new ValidationException("Validation failed: ExpirationDate is null");
         }
-
         if (data.getPendingValue() == null) {
-            log.warn("PendingValue is null");
-            return false;
+            throw new ValidationException("Validation failed: PendingValue is null");
         }
-
         if (data.getThirdId() == null) {
-            log.warn("ThirdId is null");
-            return false;
+            throw new ValidationException("Validation failed: ThirdId is null");
         }
-
         if (data.getTotalPay() == null) {
-            log.warn("TotalPay is null");
-            return false;
+            throw new ValidationException("Validation failed: TotalPay is null");
         }
-
         if (data.getTotalValue() == null) {
-            log.warn("TotalValue is null");
-            return false;
+            throw new ValidationException("Validation failed: TotalValue is null");
         }
-
-        return true;
     }
 
     /**
