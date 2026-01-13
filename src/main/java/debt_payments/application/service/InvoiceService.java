@@ -13,6 +13,13 @@ import debt_payments.domain.exception.InvoiceNotFoundException;
 import debt_payments.domain.model.Replica.InvoiceReplica;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * @brief Service class for managing invoices.
+ * This class implements both command and query use cases for invoices,
+ * handling operations such as writing off invoices, updating due dates,
+ * and retrieving invoices based on various criteria.
+ */
+
 @Service
 @RequiredArgsConstructor
 public class InvoiceService implements IInvoiceCommandUseCase, IInvoiceQueryUseCase {
@@ -26,6 +33,7 @@ public class InvoiceService implements IInvoiceCommandUseCase, IInvoiceQueryUseC
             return; 
         }
 
+        // 2. Recuperar las facturas a procesar
         List<InvoiceReplica> invoicesToProcess = invoiceProviderPort.findInvoicesByIds(invoiceIds);
 
         // 3. Validación de negocio: Verificar que encontramos todas las facturas solicitadas
@@ -35,10 +43,7 @@ public class InvoiceService implements IInvoiceCommandUseCase, IInvoiceQueryUseC
 
         // 4. Lógica de negocio: Iterar y aplicar la regla de negocio del modelo de dominio
         for (InvoiceReplica invoice : invoicesToProcess) {
-            // La lógica de cómo castigar una factura está encapsulada en el propio objeto de dominio.
-            // El servicio solo invoca el método.
             invoice.writeOff();
-            
             invoiceProviderPort.updateInvoice(invoice);
         }
     }
@@ -52,7 +57,6 @@ public class InvoiceService implements IInvoiceCommandUseCase, IInvoiceQueryUseC
             throw new IllegalStateException("No se puede cambiar la fecha de vencimiento de una factura ya pagada.");
 
         invoice.setExpirationDate(newDueDate);
-
         invoice.validateDates();
 
         invoiceProviderPort.updateInvoice(invoice);

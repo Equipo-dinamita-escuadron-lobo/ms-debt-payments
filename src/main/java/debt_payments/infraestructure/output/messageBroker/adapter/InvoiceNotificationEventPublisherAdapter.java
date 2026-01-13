@@ -11,6 +11,11 @@ import debt_payments.infraestructure.output.security.IJwtUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Adapter class responsible for publishing invoice notification events to a RabbitMQ message broker.
+ * It implements the IInvoiceNotificationEventPublisher interface.
+ */
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -19,6 +24,10 @@ public class InvoiceNotificationEventPublisherAdapter implements IInvoiceNotific
     private final RabbitTemplate rabbitTemplate;
     private final IJwtUtils jwtUtils;
 
+    /**
+     * @brief Publishes an invoice due reminder event to Notifications Exchange in RabbitMQ.
+     * @param invoiceDueReminderEventDto Data transfer object containing details of the invoice due reminder event.
+     */
     @Override
     public void publishInvoiceDueReminder(InvoiceDueReminderEventDto invoiceDueReminderEventDto) {
         EventDto<InvoiceDueReminderEventDto> event = new EventDto<>("INVOICE_DUE_REMINDER", invoiceDueReminderEventDto);

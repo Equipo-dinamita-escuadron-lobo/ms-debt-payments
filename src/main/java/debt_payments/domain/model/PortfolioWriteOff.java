@@ -37,6 +37,15 @@ public class PortfolioWriteOff implements ResourceUsageProvider{
     private String enterpriseId;
     private List<WriteOffDetail> details;
 
+    /**
+     * @brief Factory method to create a PortfolioWriteOff instance.
+     * @param enterpriseId The ID of the enterprise associated with the write-off.
+     * @param thirdId The ID of the third party associated with the write-off.
+     * @param justification The justification for the write-off.
+     * @param details The list of write-off details (invoices).
+     * @param costCenterId The ID of the cost center associated with the write-off.
+     * @return A new instance of PortfolioWriteOff initialized with the provided parameters.
+     */
     public static PortfolioWriteOff create(String enterpriseId, Long thirdId, String justification,
             List<WriteOffDetail> details, Long costCenterId) {
         if (details == null || details.isEmpty()) {
@@ -51,16 +60,18 @@ public class PortfolioWriteOff implements ResourceUsageProvider{
         writeOff.thirdId = thirdId;
         writeOff.justification = justification;
         writeOff.details = details;
-        writeOff.status = WriteOffStatus.PENDING_CONFIRMATION; // Estado inicial por defecto
+        writeOff.status = WriteOffStatus.PENDING_CONFIRMATION; 
         writeOff.writeOffDate = LocalDate.now();
         writeOff.costCenterId = costCenterId;
 
-        // El total debería calcularse, no asignarse
         writeOff.calculateTotalAmount();
 
         return writeOff;
     }
 
+    /**
+     * @brief Calculate the total amount of the write-off based on its details.
+     */
     private void calculateTotalAmount() {
         if (this.details != null) {
             this.totalAmount = this.details.stream()
@@ -70,7 +81,7 @@ public class PortfolioWriteOff implements ResourceUsageProvider{
     }
 
     /**
-     * Confirma el castigo. Cambia el estado y valida la transición.
+     * @brief Confirm the write-off. Changes the status and validates the transition.
      */
     public void confirm() {
         if (this.status != WriteOffStatus.PENDING_CONFIRMATION) {
@@ -80,7 +91,7 @@ public class PortfolioWriteOff implements ResourceUsageProvider{
     }
 
     /**
-     * Anula la confirmación del castigo. Cambia el estado y valida la transición.
+     * @brief Void the confirmation of the write-off. Changes the status and validates the transition.
      */
     public void voidConfirmation() {
         if (this.status != WriteOffStatus.CONFIRMED) {
@@ -90,8 +101,8 @@ public class PortfolioWriteOff implements ResourceUsageProvider{
     }
 
     /**
-     * Prepara las facturas para el castigo, marcándolas como pendientes.
-     * @return Lista de facturas modificadas para persistir.
+     * @brief Prepare invoices for write-off by marking them as pending.
+     * @return List of modified invoices to be persisted.
      */
     public List<InvoiceReplica> prepareInvoicesForWriteOff(Function<Long, Optional<InvoiceReplica>> invoiceFinder) {
         List<InvoiceReplica> modifiedInvoices = new ArrayList<>();
@@ -111,8 +122,8 @@ public class PortfolioWriteOff implements ResourceUsageProvider{
     }
 
     /**
-     * Ejecuta el castigo final sobre las facturas.
-     * @return Lista de facturas modificadas para persistir.
+     * @brief Execute the final write-off on the invoices.
+     * @return List of modified invoices to be persisted.
      */
     public List<InvoiceReplica> processConfirmation(Function<Long, Optional<InvoiceReplica>> invoiceFinder) {
         if (this.status != WriteOffStatus.CONFIRMED) {
@@ -129,8 +140,8 @@ public class PortfolioWriteOff implements ResourceUsageProvider{
     }
 
     /**
-     * Revierte el castigo en las facturas.
-     * @return Lista de facturas modificadas para persistir.
+     * @brief Reverse the write-off on the invoices.
+     * @return List of modified invoices to be persisted.
      */
     public List<InvoiceReplica> processVoidance(Function<Long, Optional<InvoiceReplica>> invoiceFinder) {
         if (this.status != WriteOffStatus.VOIDED) {
@@ -146,6 +157,10 @@ public class PortfolioWriteOff implements ResourceUsageProvider{
         return modifiedInvoices;
     }
 
+    /**
+     * @brief Get the list of resource usage notifications for this write-off.
+     * @return List of ResourceUsageNotification instances representing the resources used by this write-off.
+     */
     @Override
     public List<ResourceUsageNotification> getUsageNotifications() {
         List<ResourceUsageNotification> notifications = new ArrayList<>();
@@ -158,11 +173,6 @@ public class PortfolioWriteOff implements ResourceUsageProvider{
             notifications.add(new CostCenterUsedNotification(this.costCenterId, this.enterpriseId));
         }
 
-        // 3. Cuentas Contables ya no necesario
-
-        // Devolvemos solo las notificaciones únicas para no enviar el mismo evento varias veces
-        // (por si la misma cuenta contable se usa en varios detalles).
-        // NOTA: Esto requiere que implementes equals() y hashCode() en tus clases de notificación.
         return notifications.stream().distinct().collect(Collectors.toList());
     }
 }

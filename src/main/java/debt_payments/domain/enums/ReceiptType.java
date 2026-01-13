@@ -1,5 +1,10 @@
 package debt_payments.domain.enums;
 
+/**
+ * @brief Enumeration representing the type of receipt.
+ * This enum defines the different types of receipts,
+ * such as invoice payments and direct income.
+ */
 public enum ReceiptType {
     INVOICE_PAYMENT(1L, "Invoice Payment"),
     DIRECT_INCOME(2L, "Direct Income");

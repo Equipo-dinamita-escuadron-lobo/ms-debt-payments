@@ -22,6 +22,11 @@ import debt_payments.infraestructure.input.rest.mapper.IReceiptRestMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * @brief REST controller for managing receipts, including creation, voiding, and retrieval
+ * Handles endpoints for creating receipts, voiding them, and fetching receipts by various criteria
+ */
+
 @RestController
 @RequestMapping("/api/payments")
 @RequiredArgsConstructor

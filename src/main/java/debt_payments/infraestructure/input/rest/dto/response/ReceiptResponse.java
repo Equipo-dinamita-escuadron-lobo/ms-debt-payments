@@ -7,6 +7,10 @@ import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * @brief DTO for response body when retrieving receipt information
+ */
+
 @Getter
 @Setter
 public class ReceiptResponse {

@@ -11,6 +11,11 @@ import org.springframework.context.annotation.Profile;
 
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * @brief Config RabbitMQ for communication with Accounting Service, this is used to send receipts and write-offs to accounting
+ * Declares exchanges, queues and bindings
+ */
+
 @Configuration
 @Slf4j
 @Profile("!test")
@@ -26,6 +31,7 @@ public class RabbitAccountingConfig {
     public static final String WRITEOFF_ACCOUNTING_DLX = "writeoff.accounting.dlx";
     public static final String WRITEOFF_ACCOUNTING_DLQ = "writeoff.accounting.dlq";
     public static final String WRITEOFF_ACCOUNTING_RETRY_QUEUE = "writeoff.accounting.retry.queue";
+    
     // STATEMENT EXCHANGES
     @Bean
     FanoutExchange receiptExchange() {

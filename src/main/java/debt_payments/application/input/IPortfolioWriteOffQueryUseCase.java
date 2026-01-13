@@ -6,16 +6,16 @@ import java.util.Optional;
 import debt_payments.domain.model.PortfolioWriteOff;
 public interface IPortfolioWriteOffQueryUseCase {
     /**
-     * Busca un registro de castigo por su ID.
-     * @param writeOffId El ID del castigo a buscar.
-     * @return Un Optional del modelo de dominio.
+     * @brief Find a portfolio write-off by its ID.
+     * @param writeOffId The ID of the write-off to find.
+     * @return An Optional of the domain model.
      */
     Optional<PortfolioWriteOff> findById(Long writeOffId);
 
     /**
-     * Lista todos los registros de castigo para una empresa específica.
-     * @param enterpriseId El ID de la empresa.
-     * @return Una lista de modelos de dominio.
+     * @brief List all write-off records for a specific enterprise.
+     * @param enterpriseId The ID of the enterprise.
+     * @return A list of domain models.
      */
     List<PortfolioWriteOff> findByEnterpriseId(String enterpriseId);
 }

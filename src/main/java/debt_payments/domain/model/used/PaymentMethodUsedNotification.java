@@ -5,6 +5,10 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
+/**
+ * @brief Notification class indicating that a payment method is being used.
+ * This class implements the ResourceUsageNotification interface and contains the ID of the payment method and the associated enterprise ID.
+ */
 @RequiredArgsConstructor
 @Getter
 @Setter

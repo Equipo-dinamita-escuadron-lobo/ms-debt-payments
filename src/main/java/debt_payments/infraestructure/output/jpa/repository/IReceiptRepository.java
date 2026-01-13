@@ -10,10 +10,12 @@ import org.springframework.stereotype.Repository;
 
 import debt_payments.infraestructure.output.jpa.entity.ReceiptEntity;
 
+/**
+ * @brief Repository interface for managing Receipt entities.
+ * This interface extends JpaRepository to provide CRUD operations and custom queries for ReceiptEntity.
+ */
 @Repository
 public interface IReceiptRepository extends JpaRepository<ReceiptEntity, Long> {
-
-    //ReceiptEntity save(ReceiptEntity receiptEntity);
 
     Optional<ReceiptEntity> findById(Long id);
 
@@ -25,7 +27,6 @@ public interface IReceiptRepository extends JpaRepository<ReceiptEntity, Long> {
 
     /**
      * Finds all receipts that contain a detail associated with a specific invoice ID.
-     * Encuentra todos los recibos que contienen un detalle asociado a un ID de factura específico.
      * @param invoiceId The ID of the invoice.
      * @return A list of matching ReceiptEntity objects.
      */

@@ -5,6 +5,10 @@ import java.math.BigDecimal;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * @brief DTO for response body when retrieving receipt detail information
+ */
+
 @Getter
 @Setter
 public class ReceiptDetailResponse {

@@ -7,30 +7,30 @@ import debt_payments.domain.model.PortfolioWriteOff;
 
 public interface IPortfolioWriteOffPersistencePort {
     /**
-     * Guarda un nuevo registro de castigo en la base de datos.
-     * @param writeOff El modelo de dominio a persistir.
-     * @return El modelo de dominio persistido (con el ID asignado).
+     * @brief Save a new portfolio write-off record.
+     * @param writeOff The domain model to persist.
+     * @return The persisted domain model (with the assigned ID).
      */
     PortfolioWriteOff save(PortfolioWriteOff writeOff);
 
     /**
-     * Busca un registro de castigo por su ID.
-     * @param writeOffId El ID a buscar.
-     * @return Un Optional con el modelo de dominio si se encuentra.
+     * Finds a portfolio write-off record by its ID.
+     * @param writeOffId The ID to search for.
+     * @return An Optional containing the domain model if found.
      */
     Optional<PortfolioWriteOff> findById(Long writeOffId);
     
     /**
-     * Actualiza un registro de castigo existente.
-     * @param writeOff El modelo de dominio con los datos actualizados.
-     * @return El modelo de dominio actualizado.
+     * Updates an existing portfolio write-off record.
+     * @param writeOff The domain model with updated data.
+     * @return The updated domain model.
      */
     PortfolioWriteOff update(PortfolioWriteOff writeOff);
 
     /**
-     * Lista todos los registros de castigo para una empresa específica.
-     * @param enterpriseId El ID de la empresa.
-     * @return Una lista de modelos de dominio con los castigos encontrados.
+     * Lists all portfolio write-off records for a specific enterprise.
+     * @param enterpriseId The ID of the enterprise.
+     * @return A list of domain models with the found write-offs.
      */
     List<PortfolioWriteOff> findByEnterpriseId(String enterpriseId);
 }

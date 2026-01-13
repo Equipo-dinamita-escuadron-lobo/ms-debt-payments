@@ -10,6 +10,10 @@ import debt_payments.domain.model.Replica.InvoiceReplica;
 import debt_payments.infraestructure.input.rest.dto.response.InvoicePendingResponse;
 import debt_payments.infraestructure.input.rest.dto.response.InvoiceSummaryResponse;
 
+/**
+ * Mapper interface for converting InvoiceReplica domain models to REST response DTOs.
+ */
+
 @Mapper(componentModel = "spring",
         unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface IInvoiceRestMapper {

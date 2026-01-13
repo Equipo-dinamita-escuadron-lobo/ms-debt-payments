@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * DTO que representa un detalle de factura dentro de la petición de creación de un castigo.
+ * DTO that represents the details of a write-off request for a specific invoice
  */
 @Getter
 @Setter

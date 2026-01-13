@@ -5,6 +5,10 @@ import java.time.LocalDate;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * @brief DTO for response body when retrieving pending invoice information 
+ */
+
 @Getter
 @Setter
 public class InvoicePendingResponse {

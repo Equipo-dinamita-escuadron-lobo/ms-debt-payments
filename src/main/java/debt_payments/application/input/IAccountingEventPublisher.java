@@ -5,26 +5,26 @@ import debt_payments.domain.model.Receipt;
 
 public interface IAccountingEventPublisher {
     /**
-     * Publica un evento cuando un recibo de caja es creado.
-     * @param receipt El recibo de caja creado.
+     * Publish a event when a receipt is created.
+     * @param receipt The created receipt.
      */
     void publishReceiptCreatedEvent(Receipt receipt);
 
     /**
-     * Publica un evento cuando un recibo de caja es anulado.
-     * @param receipt El recibo de caja anulado.
+     * Publish a event when a receipt is voided.
+     * @param receipt The voided receipt.
      */
     void publishVoidReceiptEvent(Receipt receipt);
 
     /**
-     * Publica un evento cuando un castigo de cartera es confirmado.
-     * @param writeOff El objeto de dominio del castigo de cartera confirmado.
+     * Publish a event when a portfolio write-off is confirmed.
+     * @param writeOff The confirmed portfolio write-off domain object.
      */
     void publishWriteOffConfirmedEvent(PortfolioWriteOff writeOff);
 
     /**
-     * Publica un evento cuando un castigo de cartera es anulado.
-     * @param writeOff El objeto de dominio del castigo de cartera anulado.
+     * Publish a event when a portfolio write-off is voided.
+     * @param writeOff The voided portfolio write-off domain object.
      */
     void publishWriteOffVoidedEvent(PortfolioWriteOff writeOff);
 }

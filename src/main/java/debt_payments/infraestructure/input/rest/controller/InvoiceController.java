@@ -23,6 +23,11 @@ import debt_payments.infraestructure.input.rest.mapper.IInvoiceRestMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * @brief REST controller for managing invoices, including retrieval and updates 
+ * Handles endpoints for fetching invoices by various criteria and updating invoice due dates
+ * Also includes an endpoint to trigger invoice payment reminders
+ */
 @RestController
 @RequestMapping("/api/payments")
 @RequiredArgsConstructor
@@ -78,8 +83,6 @@ public class InvoiceController {
 
         List<InvoiceReplica> invoices = invoiceQueryUseCase.findExpiringInvoices(enterpriseId, days);
         
-        // Mapeamos a un DTO resumen para no enviar toda la data pesada
-        //Esta monda no se desplego en produccion
         List<InvoicePendingResponse> response = invoiceRestMapper.toInvoicePendingResponseList(invoices);
         
         return ResponseEntity.ok(response);
@@ -88,7 +91,6 @@ public class InvoiceController {
     @PostMapping("/trigger-reminders")
     public ResponseEntity<String> triggerInvoiceReminders() {
         try {
-            // Llamamos exactamente al mismo método que usa el scheduler. ¡No duplicamos lógica!
             invoiceNotificationUseCase.processAndPublishDueInvoices(); 
             
             String message = "Proceso de envío de recordatorios iniciado. Revisa los logs de ms_debt_payments y ms_notifications para ver el progreso.";

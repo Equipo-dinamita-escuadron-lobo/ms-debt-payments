@@ -12,12 +12,12 @@ import debt_payments.infraestructure.input.rest.dto.request.CreateWriteOffReques
 import debt_payments.infraestructure.input.rest.dto.request.WriteOffDetailRequest;
 import debt_payments.infraestructure.input.rest.dto.response.PortfolioWriteOffResponse;
 
+/**
+ * Mapper interface for converting PortfolioWriteOff domain models to REST request and response DTOs.
+ */
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface IPortfolioWriteOffRestMapper {
-        /**
-         * Convierte el DTO de creación al modelo de dominio.
-         * MapStruct se encargará de mapear la lista 'details' anidada.
-         */
+        
         PortfolioWriteOff toDomain(CreateWriteOffRequest request);
 
         WriteOffDetail toDomain(WriteOffDetailRequest detailRequest);

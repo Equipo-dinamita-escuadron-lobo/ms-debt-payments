@@ -20,6 +20,10 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * @brief RabbitMQ listener for invoice events 
+ */
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -34,6 +38,13 @@ public class InvoiceEventListener extends AbstractMessageListener<EventDto<Invoi
         this.eventRecoveryActionPort = productRecoveryActionPort;
     }
 
+    /**
+     * Handles incoming invoice events from the RabbitMQ queue.
+     * @param message The raw AMQP message.
+     * @param event The deserialized event data transfer object.
+     * @param channel The RabbitMQ channel.
+     * @param tag The delivery tag for message acknowledgment.
+     */
     @RabbitListener(queues = RabbitConfig.INVOICE_PAYMENTS_QUEUE, containerFactory = "rabbitListenerContainerFactory")
     public void handleInvoiceEvent(
             Message message,
@@ -46,6 +57,10 @@ public class InvoiceEventListener extends AbstractMessageListener<EventDto<Invoi
         handleMessage(event, channel, tag);
     }
 
+    /**
+     * @brief Processes invoice events based on their type
+     * @param event The invoice event to process
+     */
     @Override
     protected void processEvent(EventDto<InvoiceSyncDto> event) {
         InvoiceSyncDto dto = event.getData();
@@ -142,11 +157,19 @@ public class InvoiceEventListener extends AbstractMessageListener<EventDto<Invoi
         return true;
     }
 
+    /**
+     * @brief Returns the entity type for logging and error handling
+     * @return Entity type string
+     */
     @Override
     protected String getEntityType() {
         return "Invoice";
     }
 
+    /**
+     * @brief Extracts the event type from the invoice event
+     * @param event The invoice event
+     */
     @Override
     protected String extractEventType(EventDto<InvoiceSyncDto> event) {
         if (event == null) {
@@ -156,6 +179,10 @@ public class InvoiceEventListener extends AbstractMessageListener<EventDto<Invoi
         return event.getType() != null ? event.getType() : null;
     }
 
+    /**
+     * @brief Converts invoice event to JSON string for error logging
+     * @param event The invoice event
+     */
     @Override
     protected String convertEventToJson(EventDto<InvoiceSyncDto> event) {
         if (event == null) {

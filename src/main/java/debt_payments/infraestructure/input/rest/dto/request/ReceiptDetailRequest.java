@@ -5,6 +5,11 @@ import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * @brief DTO for request body when adding a receipt detail
+ * Represents the details of a payment made towards a specific invoice
+ */
+
 @Getter
 @Setter
 public class ReceiptDetailRequest {

@@ -32,11 +32,17 @@ import debt_payments.infraestructure.input.rest.mapper.IPortfolioWriteOffRestMap
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * @brief REST controller for managing portfolio write-offs (debt write-offs)
+ * Handles endpoints for creating, confirming, voiding, and retrieving write-offs
+ * Also enriches responses with invoice details where applicable
+ */
+
 @RestController
 @RequestMapping("/api/payments/write-offs")
 @RequiredArgsConstructor
 public class PortfolioWriteOffController {
-    
+
     private final IPortfolioWriteOffCommandUseCase commandUseCase;
     private final IPortfolioWriteOffQueryUseCase queryUseCase;
     private final IPortfolioWriteOffRestMapper portfolioWriteOffRestMapper;
@@ -44,7 +50,7 @@ public class PortfolioWriteOffController {
 
     @PostMapping("/")
     public ResponseEntity<PortfolioWriteOffResponse> createWriteOff(@Valid @RequestBody CreateWriteOffRequest request) {
-        
+
         // 1. Enriquecer los detalles: Buscar facturas para obtener los datos faltantes
         List<Long> invoiceIds = request.getDetails().stream().map(WriteOffDetailRequest::getInvoiceId).toList();
         Map<Long, InvoiceReplica> invoiceMap = invoiceProviderPort.findInvoicesByIds(invoiceIds).stream()
@@ -69,19 +75,18 @@ public class PortfolioWriteOffController {
 
         // 3. Crear el Agregado de Dominio usando su fábrica
         PortfolioWriteOff domainToCreate = PortfolioWriteOff.create(
-            request.getEnterpriseId(),
-            request.getThirdId(),
-            request.getJustification(),
-            domainDetails,
-            request.getCostCenterId()
-        );
-        
+                request.getEnterpriseId(),
+                request.getThirdId(),
+                request.getJustification(),
+                domainDetails,
+                request.getCostCenterId());
+
         // 4. Llamar al servicio de aplicación con un objeto de dominio válido
         domainToCreate.setWriteOffDate(request.getWriteOffDate());
         domainToCreate.setDebitAuxiliaryAccount(request.getDebitAuxiliaryAccount());
         domainToCreate.setDebitAuxiliaryAccountId(request.getDebitAuxiliaryAccountId());
         PortfolioWriteOff createdDomain = commandUseCase.createWriteOff(domainToCreate);
-        
+
         // 5. Construir la respuesta enriquecida (esta lógica ya la tenías)
         PortfolioWriteOffResponse response = buildEnrichedResponse(createdDomain);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -124,75 +129,82 @@ public class PortfolioWriteOffController {
     }
 
     /**
- * Construye un DTO de respuesta enriquecido para un castigo, incluyendo detalles de las facturas.
- * Este método es responsabilidad de la capa de infraestructura (Controller) porque se ocupa
- * de la "forma" de la respuesta HTTP.
- *
- * @param writeOff El objeto de dominio PortfolioWriteOff a partir del cual se construye la respuesta.
- * @return El DTO PortfolioWriteOffResponse completamente construido y listo para ser enviado.
- */
-private PortfolioWriteOffResponse buildEnrichedResponse(PortfolioWriteOff writeOff) {
-    // 1. Obtener todos los IDs de las facturas de los detalles del castigo
-    List<Long> invoiceIds = writeOff.getDetails().stream()
-                                    .map(WriteOffDetail::getInvoiceId)
-                                    .toList();
-    
-    // Si no hay detalles, no hay nada que enriquecer, devolvemos la respuesta base.
-    if (invoiceIds.isEmpty()) {
-        return portfolioWriteOffRestMapper.toResponse(writeOff);
+     * Construye un DTO de respuesta enriquecido para un castigo, incluyendo
+     * detalles de las facturas.
+     * Este método es responsabilidad de la capa de infraestructura (Controller)
+     * porque se ocupa
+     * de la "forma" de la respuesta HTTP.
+     *
+     * @param writeOff El objeto de dominio PortfolioWriteOff a partir del cual se
+     *                 construye la respuesta.
+     * @return El DTO PortfolioWriteOffResponse completamente construido y listo
+     *         para ser enviado.
+     */
+    private PortfolioWriteOffResponse buildEnrichedResponse(PortfolioWriteOff writeOff) {
+        // 1. Obtener todos los IDs de las facturas de los detalles del castigo
+        List<Long> invoiceIds = writeOff.getDetails().stream()
+                .map(WriteOffDetail::getInvoiceId)
+                .toList();
+
+        // Si no hay detalles, no hay nada que enriquecer, devolvemos la respuesta base.
+        if (invoiceIds.isEmpty()) {
+            return portfolioWriteOffRestMapper.toResponse(writeOff);
+        }
+
+        // 2. Obtener la información de todas esas facturas en una sola llamada para
+        // eficiencia
+        Map<Long, InvoiceReplica> invoiceMap = invoiceProviderPort.findInvoicesByIds(invoiceIds).stream()
+                .collect(Collectors.toMap(InvoiceReplica::getId, Function.identity()));
+
+        // 3. Construir la lista de detalles de respuesta (WriteOffDetailResponse)
+        List<WriteOffDetailResponse> detailResponses = writeOff.getDetails().stream()
+                .map(detail -> {
+                    InvoiceReplica invoice = invoiceMap.get(detail.getInvoiceId());
+
+                    // Caso de guarda: si por alguna inconsistencia de datos la factura no se
+                    // encuentra,
+                    // se omite este detalle para no romper la respuesta.
+                    if (invoice == null) {
+                        // Opcionalmente, puedes loggear una advertencia aquí.
+                        // log.warn("Invoice with id {} not found for WriteOff id {}",
+                        // detail.getInvoiceId(), writeOff.getId());
+                        return null;
+                    }
+
+                    // 3a. Construir el resumen de la factura (InvoiceSummaryResponse)
+                    InvoiceSummaryResponse invoiceSummary = InvoiceSummaryResponse.builder()
+                            .id(invoice.getId())
+                            .factCode(invoice.getFactCode())
+                            .totalValue(invoice.getTotalValue())
+                            .pendingValue(detail.getAmountWrittenOff())
+                            .expirationDate(invoice.getExpirationDate())
+                            .accountingAccount(invoice.getAccountingAccount())
+                            .build();
+
+                    // 3b. Construir el detalle del castigo (WriteOffDetailResponse)
+                    return WriteOffDetailResponse.builder()
+                            .amountWrittenOff(detail.getAmountWrittenOff())
+                            .invoice(invoiceSummary) // Anidar el resumen de la factura
+                            .build();
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        // 4. Construir y devolver el DTO de respuesta final (PortfolioWriteOffResponse)
+        // Usamos el patrón builder para ensamblar la respuesta final.
+        return PortfolioWriteOffResponse.builder()
+                .id(writeOff.getId())
+                .code(writeOff.getCode())
+                .justification(writeOff.getJustification())
+                .totalAmount(writeOff.getTotalAmount())
+                .writeOffDate(writeOff.getWriteOffDate())
+                .debitAuxiliaryAccount(writeOff.getDebitAuxiliaryAccount())
+                .debitAuxiliaryAccountId(writeOff.getDebitAuxiliaryAccountId())
+                .thirdId(writeOff.getThirdId())
+                .costCenterId(writeOff.getCostCenterId())
+                .status(writeOff.getStatus())
+                .enterpriseId(writeOff.getEnterpriseId())
+                .details(detailResponses) // Asignar la lista de detalles enriquecidos
+                .build();
     }
-
-    // 2. Obtener la información de todas esas facturas en una sola llamada para eficiencia
-    Map<Long, InvoiceReplica> invoiceMap = invoiceProviderPort.findInvoicesByIds(invoiceIds).stream()
-        .collect(Collectors.toMap(InvoiceReplica::getId, Function.identity()));
-
-    // 3. Construir la lista de detalles de respuesta (WriteOffDetailResponse)
-    List<WriteOffDetailResponse> detailResponses = writeOff.getDetails().stream()
-        .map(detail -> {
-            InvoiceReplica invoice = invoiceMap.get(detail.getInvoiceId());
-            
-            // Caso de guarda: si por alguna inconsistencia de datos la factura no se encuentra,
-            // se omite este detalle para no romper la respuesta.
-            if (invoice == null) {
-                // Opcionalmente, puedes loggear una advertencia aquí.
-                // log.warn("Invoice with id {} not found for WriteOff id {}", detail.getInvoiceId(), writeOff.getId());
-                return null;
-            }
-            
-            // 3a. Construir el resumen de la factura (InvoiceSummaryResponse)
-            InvoiceSummaryResponse invoiceSummary = InvoiceSummaryResponse.builder()
-                .id(invoice.getId())
-                .factCode(invoice.getFactCode())
-                .totalValue(invoice.getTotalValue())
-                .pendingValue(detail.getAmountWrittenOff())
-                .expirationDate(invoice.getExpirationDate())
-                .accountingAccount(invoice.getAccountingAccount())
-                .build();
-            
-            // 3b. Construir el detalle del castigo (WriteOffDetailResponse)
-            return WriteOffDetailResponse.builder()
-                .amountWrittenOff(detail.getAmountWrittenOff())
-                .invoice(invoiceSummary) // Anidar el resumen de la factura
-                .build();
-        })
-        .filter(Objects::nonNull)
-        .collect(Collectors.toList());
-
-    // 4. Construir y devolver el DTO de respuesta final (PortfolioWriteOffResponse)
-    // Usamos el patrón builder para ensamblar la respuesta final.
-    return PortfolioWriteOffResponse.builder()
-        .id(writeOff.getId())
-        .code(writeOff.getCode())
-        .justification(writeOff.getJustification())
-        .totalAmount(writeOff.getTotalAmount())
-        .writeOffDate(writeOff.getWriteOffDate())
-        .debitAuxiliaryAccount(writeOff.getDebitAuxiliaryAccount())
-        .debitAuxiliaryAccountId(writeOff.getDebitAuxiliaryAccountId())
-        .thirdId(writeOff.getThirdId())
-        .costCenterId(writeOff.getCostCenterId())
-        .status(writeOff.getStatus())
-        .enterpriseId(writeOff.getEnterpriseId())
-        .details(detailResponses) // Asignar la lista de detalles enriquecidos
-        .build();
-}
 }

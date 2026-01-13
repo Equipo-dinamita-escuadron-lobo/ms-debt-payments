@@ -8,46 +8,46 @@ import debt_payments.domain.model.Replica.InvoiceReplica;
 public interface IInvoiceQueryUseCase {
 
     /**
-     * Caso de uso para encontrar facturas con saldo pendiente de un cliente.
-     * @param clientId El ID del cliente a consultar.
-     * @return Lista de facturas con saldo pendiente.
+     * Use case to find pending invoices by client ID.
+     * @param clientId The ID of the client to query.
+     * @return List of invoices with pending balance.
      */
     List<InvoiceReplica> findPendingInvoicesByClientId(Long clientId);
 
     /**
-     * Caso de uso para encontrar facturas de un cliente por estado.
-     * @param clientId El ID del cliente a consultar.
-     * @param status El estado de las facturas a filtrar.
-     * @return Lista de facturas del cliente con el estado especificado.
+     * Use case to find invoices by client ID and status.
+     * @param clientId The ID of the client to query.
+     * @param status The status of the invoices to filter.
+     * @return List of invoices of the client with the specified status.
      */
     List<InvoiceReplica> findStatusInvoicesByClientId(Long clientId, InvoiceStatus status);
 
     /**
-     * Caso de uso para encontrar facturas pendientes de una empresa.
-     * @param enterpriseId El ID de la empresa a consultar.
-     * @return Lista de facturas pendientes de la empresa.
+     * Use case to find pending invoices by enterprise ID.
+     * @param enterpriseId The ID of the enterprise to query.
+     * @return List of pending invoices of the enterprise.
      */
     List<InvoiceReplica> findPendingInvoicesByEnterpriseId(String enterpriseId);
 
     /**
-     * Caso de uso para encontrar facturas de una empresa.
-     * @param enterpriseId El ID de la empresa a consultar.
-     * @return Lista de facturas de la empresa.
+     * Use case to find invoices by enterprise ID.
+     * @param enterpriseId The ID of the enterprise to query.
+     * @return List of invoices of the enterprise.
      */
     List<InvoiceReplica> findInvoicesByEnterpriseId(String enterpriseId);
 
     /**
-     * Caso de uso para encontrar una factura por su id.
-     * @param invoiceId El ID de la factura a consultar.
-     * @return La factura encontrada o null si no existe.
+     * Use case to find an invoice by its ID.
+     * @param invoiceId The ID of the invoice to query.
+     * @return The found invoice or null if it does not exist.
      */
     InvoiceReplica findInvoiceById(Long invoiceId);
 
     /**
-     * Busca facturas pendientes que vencen en los próximos 'days' días.
-     * @param enterpriseId El ID de la empresa.
-     * @param daysThreshold El número de días para el umbral de vencimiento.
-     * @return Una lista de objetos de dominio InvoiceReplica que representan las facturas próximas a vencer.
+     * Use case to find pending invoices that expire within the next 'days' days.
+     * @param enterpriseId The ID of the enterprise.
+     * @param daysThreshold The number of days for the expiration threshold.
+     * @return A list of InvoiceReplica domain objects representing the invoices nearing expiration.
      */
     List<InvoiceReplica> findExpiringInvoices(String enterpriseId, int daysThreshold);
 }

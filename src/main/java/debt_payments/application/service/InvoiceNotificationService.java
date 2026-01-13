@@ -15,20 +15,28 @@ import debt_payments.infraestructure.output.messageBroker.dto.InvoiceDetailEvent
 import debt_payments.infraestructure.output.messageBroker.dto.InvoiceDueReminderEventDto;
 import lombok.RequiredArgsConstructor;
 
+/***
+ * @brief Service class for handling invoice notifications.
+ * This class processes due invoices and publishes consolidated
+ * notification events for clients with pending invoices.
+ */
+
 @Service
 @RequiredArgsConstructor
 public class InvoiceNotificationService implements IInvoiceNotificationUseCase {
 
     private final IInvoiceProviderPort invoiceProviderPort;
     private final IInvoiceNotificationEventPublisher notificationPublisher;
-
-    // TODO: Este valor debe venir de la BD según la confx  iguración de la HU-2.1
     private static final int DAYS_BEFORE_DUE = 5; 
 
+    /**
+     * @brief Process and publish due invoice notifications.
+     * This method retrieves invoices that are due in a specified number of days,
+     * groups them by third party ID, constructs consolidated notification events, 
+     * and publishes them.
+     */
     @Override
     public void processAndPublishDueInvoices() {
-        // TODO: Añadir lógica para verificar si las notificaciones están activadas (HU-2.1)
-        
         LocalDate targetDate = LocalDate.now().plusDays(DAYS_BEFORE_DUE);
         List<InvoiceReplica> dueInvoices = invoiceProviderPort.findInvoicesByExpirationDate(targetDate);
 
@@ -63,6 +71,11 @@ public class InvoiceNotificationService implements IInvoiceNotificationUseCase {
         return consolidatedDto;
     }
 
+    /**
+     * @brief Build InvoiceDetailEventDto from InvoiceReplica.
+     * @param invoice The InvoiceReplica instance.
+     * @return The constructed InvoiceDetailEventDto.
+     */
     private InvoiceDetailEventDto buildInvoiceDetail(InvoiceReplica invoice) {
         InvoiceDetailEventDto detailDto = new InvoiceDetailEventDto();
         detailDto.setInvoiceCode(Long.parseLong(invoice.getFactCode()));

@@ -8,6 +8,11 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
+/**
+ * InvoiceReplica class represents a replica of an invoice in the debt payments domain.
+ * It contains attributes and methods to manage invoice state and operations.
+ */
+
 @Getter
 @Setter
 @RequiredArgsConstructor

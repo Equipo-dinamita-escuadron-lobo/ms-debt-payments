@@ -19,6 +19,11 @@ import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.boot.autoconfigure.amqp.SimpleRabbitListenerContainerFactoryConfigurer;
 
+/**
+ * @brief Config RabbitMQ for communication with Debt Payments Service, this is used to send and receive debt payment messages
+ * Declares exchanges, queues and bindings
+ */
+
 @Configuration
 @Slf4j
 @Profile("!test")

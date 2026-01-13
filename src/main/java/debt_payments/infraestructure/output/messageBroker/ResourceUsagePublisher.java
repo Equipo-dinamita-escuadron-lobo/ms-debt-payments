@@ -22,6 +22,11 @@ import debt_payments.infraestructure.output.security.IJwtUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * @brief Implementation of the Resource Usage Notifier using RabbitMQ.
+ * This class is responsible for notifying the usage of various resources to the message broker.
+ */
+
 @Component
 @RequiredArgsConstructor
 @Slf4j

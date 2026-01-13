@@ -20,6 +20,12 @@ import debt_payments.domain.model.ReceiptStatus;
 import debt_payments.domain.model.Replica.InvoiceReplica;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * @brief Service class for managing receipts.
+ * This class implements both command and query use cases for receipts,
+ * handling operations such as creating, voiding, and retrieving receipts.
+ */
+
 @Service
 @RequiredArgsConstructor
 public class ReceiptService implements IReceiptCommandUseCase, IReceiptQueryUseCase  {
