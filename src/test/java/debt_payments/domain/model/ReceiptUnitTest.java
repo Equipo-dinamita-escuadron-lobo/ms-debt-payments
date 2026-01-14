@@ -137,5 +137,57 @@ public class ReceiptUnitTest {
             assertThat(n.getClass().getSimpleName()).isEqualTo("CostCenterUsedNotification");
         });
     }
+
+    @Test
+    @DisplayName("processInvoicePayments throws IllegalStateException when invoice belongs to different third party")
+    void processInvoicePaymentsThrowsWhenInvoiceBelongsToDifferentThirdParty() {
+        // Arrange: Receipt for thirdPartyId = 5L
+        var detail = TestFixtures.receiptDetail(1L, 200L);
+        var receipt = TestFixtures.receiptForInvoicePayment("ENT-1", 5L, 1L, "obs", List.of(detail));
+
+        // Invoice belongs to thirdPartyId = 1L (different from receipt)
+        InvoiceReplica inv = TestFixtures.invoiceReplicaWith(1L, 1000L, 500L, InvoiceStatus.PENDING);
+
+        // Act & Assert
+        assertThatThrownBy(() -> receipt.processInvoicePayments(id -> Optional.of(inv)))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Error de inconsistencia")
+                .hasMessageContaining("La factura con código")
+                .hasMessageContaining("pertenece al tercero con ID 1")
+                .hasMessageContaining("pero el recibo se está creando para el tercero con ID 5");
+    }
+
+    @Test
+    @DisplayName("processInvoicePayments succeeds when invoice belongs to same third party as receipt")
+    void processInvoicePaymentsSucceedsWhenInvoiceBelongsToSameThirdParty() throws Exception {
+        // Arrange: Receipt and Invoice both for thirdPartyId = 10L
+        var detail = TestFixtures.receiptDetail(1L, 300L);
+        var receipt = TestFixtures.receiptForInvoicePayment("ENT-1", 10L, 1L, "obs", List.of(detail));
+
+        // Create invoice with matching thirdId = 10L
+        InvoiceReplica inv = new InvoiceReplica(
+                1L,
+                "F-1",
+                1000L,
+                200L,
+                10L, // thirdId matches receipt
+                800L,
+                1000L,
+                java.time.LocalDate.now().minusDays(30),
+                java.time.LocalDate.now().plusDays(30),
+                "ENT-1",
+                InvoiceStatus.PENDING,
+                true
+        );
+
+        // Act
+        var modified = receipt.processInvoicePayments(id -> Optional.of(inv));
+
+        // Assert
+        assertThat(modified).containsExactly(inv);
+        assertThat(inv.getTotalPay()).isEqualTo(500L); // 200 + 300
+        assertThat(detail.getInvoiceCode()).isEqualTo(inv.getFactCode());
+        assertThat(detail.getAccountingAccount()).isEqualTo(inv.getAccountingAccount());
+    }
 }
 
