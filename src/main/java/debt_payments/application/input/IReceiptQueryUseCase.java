@@ -1,7 +1,6 @@
 package debt_payments.application.input;
 
 import java.util.List;
-import java.util.Optional;
 
 import debt_payments.domain.model.Receipt;
 
@@ -12,7 +11,7 @@ public interface IReceiptQueryUseCase {
      * @param id The ID of the receipt.
      * @return An Optional containing the found receipt, or empty if not found.
      */
-    Optional<Receipt> findById(Long id);
+    Receipt findById(Long id);
 
     /**
      * @brief Finds receipts by the associated invoice ID.

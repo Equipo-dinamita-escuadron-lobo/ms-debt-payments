@@ -17,14 +17,17 @@ import debt_payments.application.input.IReceiptQueryUseCase;
 import debt_payments.domain.model.Receipt;
 import debt_payments.infraestructure.input.rest.dto.request.ReceiptCreateRequest;
 import debt_payments.infraestructure.input.rest.dto.request.VoidReceiptRequest;
+import debt_payments.infraestructure.input.rest.dto.response.ApiResponse;
 import debt_payments.infraestructure.input.rest.dto.response.ReceiptResponse;
 import debt_payments.infraestructure.input.rest.mapper.IReceiptRestMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 /**
- * @brief REST controller for managing receipts, including creation, voiding, and retrieval
- * Handles endpoints for creating receipts, voiding them, and fetching receipts by various criteria
+ * @brief REST controller for managing receipts, including creation, voiding,
+ *        and retrieval
+ *        Handles endpoints for creating receipts, voiding them, and fetching
+ *        receipts by various criteria
  */
 
 @RestController
@@ -36,55 +39,73 @@ public class ReceiptController {
     private final IReceiptRestMapper receiptRestMapper;
 
     @PostMapping("/")
-    public ResponseEntity<ReceiptResponse> createReceipt(@Valid @RequestBody ReceiptCreateRequest request) {
-        Receipt domainModel = receiptRestMapper.toDomain(request);  //Convertir DTO de request a Modelo de Dominio
-        Receipt createdReceipt = receiptCommandUseCase.createReceipt(domainModel);  //Llamar al caso de uso para ejecutar la lógica de negocio
-        return ResponseEntity.status(HttpStatus.CREATED).body(receiptRestMapper.toResponse(createdReceipt));  //Convertir el resultado del Dominio a DTO de respuesta y devolverlo
+    public ResponseEntity<ApiResponse<ReceiptResponse>> createReceipt(
+            @Valid @RequestBody ReceiptCreateRequest request) {
+        Receipt domainModel = receiptRestMapper.toDomain(request);
+        Receipt createdReceipt = receiptCommandUseCase.createReceipt(domainModel);
+        ReceiptResponse responseDto = receiptRestMapper.toResponse(createdReceipt);
+
+        // Mantenemos el espíritu del 201 Created, pero con nuestro wrapper.
+        // El 'data' es el recibo creado.
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.success(responseDto, "Recibo creado exitosamente."));
     }
 
     @PutMapping("/{id}/void")
-    public ResponseEntity<ReceiptResponse> voidReceipt(@PathVariable Long id, 
-    @Valid @RequestBody VoidReceiptRequest request) {
-        Receipt voidedReceipt = receiptCommandUseCase.voidReceipt(id, request.getReason()); 
-        return ResponseEntity.ok(receiptRestMapper.toResponse(voidedReceipt));
+    public ResponseEntity<ApiResponse<ReceiptResponse>> voidReceipt(@PathVariable Long id,
+            @Valid @RequestBody VoidReceiptRequest request) {
+        Receipt voidedReceipt = receiptCommandUseCase.voidReceipt(id, request.getReason());
+        ReceiptResponse responseDto = receiptRestMapper.toResponse(voidedReceipt);
+
+        // La operación fue exitosa, devolvemos un 200 OK con el recibo anulado.
+        return ResponseEntity.ok(ApiResponse.success(responseDto, "Recibo anulado correctamente."));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ReceiptResponse> getReceiptById(@PathVariable Long id) {
-        return receiptQueryUseCase.findById(id) 
-                .map(receiptRestMapper::toResponse) 
-                .map(ResponseEntity::ok) 
-                .orElseGet(() -> ResponseEntity.notFound().build()); 
+    public ResponseEntity<ApiResponse<ReceiptResponse>> getReceiptById(@PathVariable Long id) {
+        Receipt receipt = receiptQueryUseCase.findById(id);
+        ReceiptResponse responseDto = receiptRestMapper.toResponse(receipt);
+
+        return ResponseEntity.ok(ApiResponse.success(responseDto));
     }
 
     @GetMapping("/by-enterprise/{enterpriseId}")
-    public ResponseEntity<List<ReceiptResponse>> getAllReceiptsByEnterprise(@PathVariable String enterpriseId) {
+    public ResponseEntity<ApiResponse<List<ReceiptResponse>>> getAllReceiptsByEnterprise(
+            @PathVariable String enterpriseId) {
         List<Receipt> receipts = receiptQueryUseCase.findByEnterpriseId(enterpriseId);
-        
-        if (receipts.isEmpty()) 
-            return ResponseEntity.noContent().build(); // Devuelve 204 No Content si la lista está vacía
 
-        return ResponseEntity.ok(receiptRestMapper.toResponseList(receipts));
+        if (receipts.isEmpty()) {
+            // Reemplazamos 204 No Content por 200 OK con nuestro wrapper informativo.
+            return ResponseEntity.ok(
+                    ApiResponse.successEmpty("No se encontraron recibos para la empresa especificada.", "NO_CONTENT"));
+        }
+
+        return ResponseEntity.ok(ApiResponse.success(receiptRestMapper.toResponseList(receipts)));
     }
 
     @GetMapping("/by-invoice/{invoiceId}")
-    public ResponseEntity<List<ReceiptResponse>> getAllReceiptsByInvoice(@PathVariable String invoiceId) {
+    public ResponseEntity<ApiResponse<List<ReceiptResponse>>> getAllReceiptsByInvoice(@PathVariable String invoiceId) {
         List<Receipt> receipts = receiptQueryUseCase.findByInvoiceId(invoiceId);
 
-        if (receipts.isEmpty())
-            return ResponseEntity.noContent().build(); 
+        if (receipts.isEmpty()) {
+            return ResponseEntity.ok(
+                    ApiResponse.successEmpty("No se encontraron recibos asociados a la factura.", "NO_CONTENT"));
+        }
 
-        return ResponseEntity.ok(receiptRestMapper.toResponseList(receipts));
+        return ResponseEntity.ok(ApiResponse.success(receiptRestMapper.toResponseList(receipts)));
     }
 
     @GetMapping("/by-third/{thirdId}")
-    public ResponseEntity<List<ReceiptResponse>> getAllReceiptsByThird(@PathVariable String thirdId) {
+    public ResponseEntity<ApiResponse<List<ReceiptResponse>>> getAllReceiptsByThird(@PathVariable String thirdId) {
         List<Receipt> receipts = receiptQueryUseCase.findByThirdPartyId(thirdId);
 
-        if (receipts.isEmpty())
-            return ResponseEntity.noContent().build();
+        if (receipts.isEmpty()) {
+            return ResponseEntity.ok(
+                    ApiResponse.successEmpty("No se encontraron recibos asociados al tercero.", "NO_CONTENT"));
+        }
 
-        return ResponseEntity.ok(receiptRestMapper.toResponseList(receipts));
+        return ResponseEntity.ok(ApiResponse.success(receiptRestMapper.toResponseList(receipts)));
     }
 
 }
