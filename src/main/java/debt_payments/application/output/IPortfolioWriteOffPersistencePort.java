@@ -33,4 +33,11 @@ public interface IPortfolioWriteOffPersistencePort {
      * @return A list of domain models with the found write-offs.
      */
     List<PortfolioWriteOff> findByEnterpriseId(String enterpriseId);
+
+    /**
+     * Lists all confirmed or voided portfolio write-off records for a specific enterprise.
+     * @param enterpriseId The ID of the enterprise.
+     * @return A list of domain models with the found write-offs.
+     */
+    List<PortfolioWriteOff> findConfirmedOrVoidedByEnterpriseId(String enterpriseId);
 }

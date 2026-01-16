@@ -54,5 +54,11 @@ public class PortfolioWriteOffPersistenceAdapter implements IPortfolioWriteOffPe
         List<PortfolioWriteOffEntity> entities = portfolioWriteOffRepository.findByEnterpriseId(enterpriseId);
         return portfolioWriteOffMapper.toDomainList(entities);
     }
+
+    @Override
+    public List<PortfolioWriteOff> findConfirmedOrVoidedByEnterpriseId(String enterpriseId) {
+        List<PortfolioWriteOffEntity> entities = portfolioWriteOffRepository.findConfirmedOrVoidedByEnterpriseId(enterpriseId);
+        return portfolioWriteOffMapper.toDomainList(entities);
+    }
     
 }

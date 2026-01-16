@@ -1,7 +1,6 @@
 package debt_payments.application.service;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -98,8 +97,8 @@ public class PortfolioWriteOffService implements IPortfolioWriteOffCommandUseCas
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<PortfolioWriteOff> findById(Long writeOffId) {
-        return Optional.of(findWriteOffOrThrow(writeOffId));
+    public PortfolioWriteOff findById(Long writeOffId) {
+        return findWriteOffOrThrow(writeOffId);
     }
 
     @Override
@@ -117,10 +116,15 @@ public class PortfolioWriteOffService implements IPortfolioWriteOffCommandUseCas
      */
     private PortfolioWriteOff findWriteOffOrThrow(Long writeOffId) {
         return writeOffPersistencePort.findById(writeOffId)
-                .orElseThrow(() -> new PortfolioWriteOffNotFoundException("PortfolioWriteOff not found with id: " + writeOffId));
+                .orElseThrow(() -> new PortfolioWriteOffNotFoundException("Castigo de cartera con ID: " + writeOffId + " no fue encontrado."));
     }
 
     private String generateUniqueWriteOffCode() {
         return "CC-" + System.currentTimeMillis();
+    }
+
+    @Override
+    public List<PortfolioWriteOff> findConfirmedOrVoidedByEnterpriseId(String enterpriseId) {
+        return writeOffPersistencePort.findConfirmedOrVoidedByEnterpriseId(enterpriseId);
     }
 }

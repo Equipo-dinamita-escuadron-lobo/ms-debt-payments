@@ -187,21 +187,20 @@ public class ReceiptServiceUnitTest {
 
         when(receiptQueryPersistencePort.findById(40L)).thenReturn(Optional.of(receipt));
 
-        Optional<Receipt> result = receiptService.findById(40L);
+        Receipt result = receiptService.findById(40L);
 
-        assertThat(result).isPresent();
-        assertThat(result.get()).isEqualTo(receipt);
+        assertThat(result).isEqualTo(receipt);
         verify(receiptQueryPersistencePort).findById(40L);
     }
 
     @Test
-    @DisplayName("findById should return empty when receipt not found")
-    void shouldReturnEmptyWhenReceiptNotFound() {
+    @DisplayName("findById should throw ReceiptNotFoundException when receipt not found")
+    void shouldThrowWhenReceiptNotFound() {
         when(receiptQueryPersistencePort.findById(999L)).thenReturn(Optional.empty());
 
-        Optional<Receipt> result = receiptService.findById(999L);
-
-        assertThat(result).isEmpty();
+        assertThatThrownBy(() -> receiptService.findById(999L))
+                .isInstanceOf(ReceiptNotFoundException.class)
+                .hasMessageContaining("no fue encontrado");
         verify(receiptQueryPersistencePort).findById(999L);
     }
 

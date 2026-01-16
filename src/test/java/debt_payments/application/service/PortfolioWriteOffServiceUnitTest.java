@@ -97,7 +97,7 @@ public class PortfolioWriteOffServiceUnitTest {
             // ACT & ASSERT
             assertThatThrownBy(() -> portfolioWriteOffService.confirmWriteOff(nonExistentId))
                     .isInstanceOf(PortfolioWriteOffNotFoundException.class)
-                    .hasMessage("PortfolioWriteOff not found with id: " + nonExistentId);
+                    .hasMessageContaining("no fue encontrado");
 
             // Verificamos que no se hicieron más llamadas, la ejecución se detuvo como debía.
             verify(invoiceProviderPort, never()).updateInvoice(any());
@@ -197,7 +197,7 @@ public class PortfolioWriteOffServiceUnitTest {
             // ACT & ASSERT
             assertThatThrownBy(() -> portfolioWriteOffService.voidWriteOffConfirmation(nonExistentId))
                     .isInstanceOf(PortfolioWriteOffNotFoundException.class)
-                    .hasMessage("PortfolioWriteOff not found with id: " + nonExistentId);
+                    .hasMessageContaining("no fue encontrado");
 
             // VERIFY
             // Nos aseguramos de que no se intentó hacer ninguna otra operación.
@@ -307,8 +307,8 @@ public class PortfolioWriteOffServiceUnitTest {
     class QueryTests {
 
         @Test
-        @DisplayName("findById debe devolver Optional con el castigo si existe")
-        void shouldReturnOptionalWhenFindByIdExists() {
+        @DisplayName("findById debe devolver el castigo si existe")
+        void shouldReturnWriteOffWhenFindByIdExists() {
             // ARRANGE
             Long writeOffId = 10L;
             var sample = TestFixtures.portfolioWriteOffWithDetails("ENT-1", 1L, "just", List.of(TestFixtures.writeOffDetail(1L, 100L)));
@@ -317,11 +317,10 @@ public class PortfolioWriteOffServiceUnitTest {
             when(writeOffPersistencePort.findById(writeOffId)).thenReturn(Optional.of(sample));
 
             // ACT
-            Optional<PortfolioWriteOff> result = portfolioWriteOffService.findById(writeOffId);
+            PortfolioWriteOff result = portfolioWriteOffService.findById(writeOffId);
 
             // ASSERT
-            assertThat(result).isPresent();
-            assertThat(result.get()).isEqualTo(sample);
+            assertThat(result).isEqualTo(sample);
             verify(writeOffPersistencePort).findById(writeOffId);
         }
 
@@ -335,7 +334,7 @@ public class PortfolioWriteOffServiceUnitTest {
             // ACT/ASSERT
             assertThatThrownBy(() -> portfolioWriteOffService.findById(missingId))
                     .isInstanceOf(PortfolioWriteOffNotFoundException.class)
-                    .hasMessage("PortfolioWriteOff not found with id: " + missingId);
+                    .hasMessageContaining("no fue encontrado");
 
             verify(writeOffPersistencePort).findById(missingId);
         }

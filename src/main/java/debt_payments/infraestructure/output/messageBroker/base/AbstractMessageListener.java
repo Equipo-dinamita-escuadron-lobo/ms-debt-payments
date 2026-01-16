@@ -3,6 +3,7 @@ package debt_payments.infraestructure.output.messageBroker.base;
 import org.springframework.amqp.core.Message;
 import com.rabbitmq.client.Channel;
 
+import debt_payments.domain.exception.ValidationException;
 import debt_payments.domain.ports.IEventRecoveryActionPort;
 import debt_payments.domain.ports.IMessageErrorHandlingPort;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +25,8 @@ public abstract class AbstractMessageListener<T> {
 
     /**
      * Puerto para ejecutar acciones de recuperación cuando falla el procesamiento.
-     * Opcional - puede ser inyectado por las clases hijas si necesitan recuperación automática.
+     * Opcional - puede ser inyectado por las clases hijas si necesitan recuperación
+     * automática.
      */
     protected IEventRecoveryActionPort<T> eventRecoveryActionPort;
 
@@ -35,17 +37,18 @@ public abstract class AbstractMessageListener<T> {
     protected void handleMessage(T event, Channel channel, long deliveryTag) {
         try {
             log.info("Received {} message from queue", getEntityType());
-            
-            if (!isValidEvent(event)) {
-                log.warn("Invalid {} event received, saving error to database", getEntityType());
-                handleValidationError(event);
-                acknowledgeMessage(channel, deliveryTag);
-                return;
-            }
-            
+
+            validateEvent(event);
+
             processEvent(event);
             acknowledgeMessage(channel, deliveryTag);
             log.info("{} message processed successfully", getEntityType());
+
+        } catch (ValidationException ve) { 
+            log.warn("Invalid {} event received: {}. Saving error to database", getEntityType(), ve.getMessage());
+            handleValidationError(event, ve); 
+            acknowledgeMessage(channel, deliveryTag);
+
         } catch (Exception e) {
             handleProcessingError(e, event, channel, deliveryTag);
         }
@@ -59,7 +62,7 @@ public abstract class AbstractMessageListener<T> {
     /**
      * Valida si el evento es válido para procesamiento.
      */
-    protected abstract boolean isValidEvent(T event);
+    protected abstract void validateEvent(T event) throws ValidationException;
 
     /**
      * Retorna el tipo de entidad que maneja este listener (para logging).
@@ -72,21 +75,21 @@ public abstract class AbstractMessageListener<T> {
     private void handleProcessingError(Exception e, T event, Channel channel, long deliveryTag) {
         try {
             log.error("Error processing {} message: {}", getEntityType(), e.getMessage(), e);
-            
+
             // Intentar ejecutar acción de recuperación si está disponible
             boolean recoveryExecuted = attemptRecovery(event);
-            
+
             // Guardar error en base de datos
             if (messageErrorHandlingPort != null) {
                 String eventType = extractEventType(event);
                 String messageData = convertEventToJson(event);
-                String errorDescription = String.format("Processing error: %s%s", 
-                    e.getMessage(), 
-                    recoveryExecuted ? " (Recovery action executed)" : "");
-                
+                String errorDescription = String.format("Processing error: %s%s",
+                        e.getMessage(),
+                        recoveryExecuted ? " (Recovery action executed)" : "");
+
                 messageErrorHandlingPort.saveProcessingError(eventType, errorDescription, messageData, getEntityType());
             }
-            
+
             acknowledgeMessage(channel, deliveryTag); // ACK para evitar reenvío
         } catch (Exception ackException) {
             log.error("Error acknowledging message: {}", ackException.getMessage());
@@ -96,51 +99,53 @@ public abstract class AbstractMessageListener<T> {
     /**
      * Maneja errores de validación de eventos.
      */
-    private void handleValidationError(T event) {
+    private void handleValidationError(T event, ValidationException e) {
         try {
             if (messageErrorHandlingPort != null) {
                 String eventType = extractEventType(event);
                 String messageData = convertEventToJson(event);
-                String errorDescription = "Validation failed: Required fields are missing or invalid";
-                
+                String errorDescription = e.getMessage();
+
                 messageErrorHandlingPort.saveProcessingError(eventType, errorDescription, messageData, getEntityType());
             }
-        } catch (Exception e) {
-            log.error("Error saving validation error to database: {}", e.getMessage());
+        } catch (Exception ex) {
+            log.error("Error saving validation error to database: {}", ex.getMessage());
         }
     }
 
     /**
-     * Intenta ejecutar una acción de recuperación cuando falla el procesamiento del evento.
+     * Intenta ejecutar una acción de recuperación cuando falla el procesamiento del
+     * evento.
      * 
      * @param event El evento que falló al procesarse
-     * @return true si se ejecutó una acción de recuperación, false en caso contrario
+     * @return true si se ejecutó una acción de recuperación, false en caso
+     *         contrario
      */
     private boolean attemptRecovery(T event) {
         if (eventRecoveryActionPort == null) {
             log.debug("No recovery action port configured for {}", getEntityType());
             return false;
         }
-        
+
         try {
             if (eventRecoveryActionPort.canHandle(event)) {
                 log.info("Attempting recovery action for failed {} event", getEntityType());
                 boolean success = eventRecoveryActionPort.executeRecoveryAction(event);
-                
+
                 if (success) {
                     log.info("Recovery action executed successfully for {} event", getEntityType());
                 } else {
                     log.warn("Recovery action failed for {} event", getEntityType());
                 }
-                
+
                 return success;
             } else {
                 log.debug("Recovery action cannot handle this {} event", getEntityType());
                 return false;
             }
         } catch (Exception recoveryException) {
-            log.error("Error executing recovery action for {} event: {}", 
-                getEntityType(), recoveryException.getMessage(), recoveryException);
+            log.error("Error executing recovery action for {} event: {}",
+                    getEntityType(), recoveryException.getMessage(), recoveryException);
             return false;
         }
     }
@@ -169,14 +174,19 @@ public abstract class AbstractMessageListener<T> {
     }
 
     /**
-     * Extrae el tipo de evento del mensaje. Debe ser implementado por cada listener.
+     * Extrae el tipo de evento del mensaje. Debe ser implementado por cada
+     * listener.
+     * 
      * @param event El evento del cual extraer el tipo
-     * @return String representando el tipo de evento, o null si no se puede determinar
+     * @return String representando el tipo de evento, o null si no se puede
+     *         determinar
      */
     protected abstract String extractEventType(T event);
 
     /**
-     * Convierte el evento a JSON para almacenamiento en BD. Debe ser implementado por cada listener.
+     * Convierte el evento a JSON para almacenamiento en BD. Debe ser implementado
+     * por cada listener.
+     * 
      * @param event El evento a convertir
      * @return String en formato JSON con los datos del evento
      */

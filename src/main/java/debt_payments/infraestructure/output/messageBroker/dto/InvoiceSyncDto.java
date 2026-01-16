@@ -12,7 +12,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class InvoiceSyncDto {
-    //TODO Revisar que los nombres de los campos que devuelve el entpoint original son estos
     private Long factCode;
     private String entId;
     private Long thirdId;

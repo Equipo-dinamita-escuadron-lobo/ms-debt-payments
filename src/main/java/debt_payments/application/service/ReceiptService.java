@@ -2,7 +2,6 @@ package debt_payments.application.service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -104,8 +103,9 @@ public class ReceiptService implements IReceiptCommandUseCase, IReceiptQueryUseC
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<Receipt> findById(Long id) {
-        return receiptQueryPersistencePort.findById(id);
+    public Receipt findById(Long id) {
+        return receiptQueryPersistencePort.findById(id)
+            .orElseThrow(() -> new ReceiptNotFoundException("El recibo con ID " + id + " no fue encontrado."));
     }
 
     @Override

@@ -133,6 +133,13 @@ public class Receipt implements ResourceUsageProvider {
                     .orElseThrow(() -> new InvoiceNotFoundException(
                             "Invoice with id " + detail.getInvoiceId() + " not found."));
 
+            if (!invoice.getThirdId().equals(this.thirdPartyId)) {
+                throw new IllegalStateException(
+                        "Error de inconsistencia: La factura con código " + invoice.getFactCode() +
+                                " pertenece al tercero con ID " + invoice.getThirdId() +
+                                ", pero el recibo se está creando para el tercero con ID " + this.thirdPartyId + ".");
+            }
+
             // Delegamos la lógica de aplicar el pago a la factura
             invoice.applyPayment(Long.valueOf(detail.getAmountPaid()));
 
@@ -145,7 +152,8 @@ public class Receipt implements ResourceUsageProvider {
     }
 
     /**
-     * @brief Void the receipt, reversing its effects on associated invoices if applicable.
+     * @brief Void the receipt, reversing its effects on associated invoices if
+     *        applicable.
      * 
      * @param reason        The reason for voiding the receipt.
      * @param invoiceFinder A function that knows how to find an invoice by its ID.
@@ -192,7 +200,7 @@ public class Receipt implements ResourceUsageProvider {
         this.receiptCode = code;
     }
 
-    /** 
+    /**
      * @brief Calculate the total amount from the receipt details.
      */
     private void calculateTotalFromDetails() {
@@ -204,7 +212,9 @@ public class Receipt implements ResourceUsageProvider {
     }
 
     /**
-     * Return a list of resource usage notifications for the resources utilized by this receipt.
+     * Return a list of resource usage notifications for the resources utilized by
+     * this receipt.
+     * 
      * @return A list of ResourceUsageNotification instances.
      */
     @Override
@@ -218,14 +228,14 @@ public class Receipt implements ResourceUsageProvider {
         if (this.receiptType == ReceiptType.DIRECT_INCOME && this.centerCostId != null) {
             notifications.add(new CostCenterUsedNotification(this.centerCostId, this.enterpriseId));
         }
-        
+
         // 3. Método de Pago
         if (this.paymentMethodId != null) {
             notifications.add(new PaymentMethodUsedNotification(this.paymentMethodId, this.enterpriseId));
         }
 
         // 4. Cuentas Contables principales ya no es necesario
-        
+
         return notifications;
     }
 }

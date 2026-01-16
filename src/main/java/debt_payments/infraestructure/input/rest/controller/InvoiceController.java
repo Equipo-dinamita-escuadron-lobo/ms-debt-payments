@@ -18,6 +18,7 @@ import debt_payments.application.input.IInvoiceQueryUseCase;
 import debt_payments.domain.enums.InvoiceStatus;
 import debt_payments.domain.model.Replica.InvoiceReplica;
 import debt_payments.infraestructure.input.rest.dto.request.UpdateDueDateRequest;
+import debt_payments.infraestructure.input.rest.dto.response.ApiResponse;
 import debt_payments.infraestructure.input.rest.dto.response.InvoicePendingResponse;
 import debt_payments.infraestructure.input.rest.mapper.IInvoiceRestMapper;
 import jakarta.validation.Valid;
@@ -38,54 +39,87 @@ public class InvoiceController {
     private final IInvoiceNotificationUseCase invoiceNotificationUseCase;
 
     @GetMapping("/invoices/{invoiceId}")
-    public ResponseEntity<InvoicePendingResponse> getInvoiceById(@PathVariable Long invoiceId) {
-        var invoice = invoiceQueryUseCase.findInvoiceById(invoiceId);
-        var response = invoiceRestMapper.toInvoicePendingResponse(invoice);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<ApiResponse<InvoicePendingResponse>> getInvoiceById(@PathVariable Long invoiceId) {
+        InvoiceReplica invoice = invoiceQueryUseCase.findInvoiceById(invoiceId);
+        InvoicePendingResponse responseDto = invoiceRestMapper.toInvoicePendingResponse(invoice);
+        
+        return ResponseEntity.ok(ApiResponse.success(responseDto));
     }
 
     @GetMapping("/pending/client/{clientId}")
-    public ResponseEntity<List<InvoicePendingResponse>> getPendingInvoicesByClient(@PathVariable Long clientId) {
-        var pendingInvoices = invoiceQueryUseCase.findStatusInvoicesByClientId(clientId, InvoiceStatus.PENDING);
-        return ResponseEntity.ok(invoiceRestMapper.toInvoicePendingResponseList(pendingInvoices));
+    public ResponseEntity<ApiResponse<List<InvoicePendingResponse>>> getPendingInvoicesByClient(@PathVariable Long clientId) {
+        List<InvoiceReplica> pendingInvoices = invoiceQueryUseCase.findStatusInvoicesByClientId(clientId, InvoiceStatus.PENDING);
+
+        if (pendingInvoices.isEmpty()) {
+            return ResponseEntity.ok(
+                ApiResponse.successEmpty("No se encontraron facturas pendientes para el cliente.", "NO_CONTENT")
+            );
+        }
+
+        List<InvoicePendingResponse> responseDtoList = invoiceRestMapper.toInvoicePendingResponseList(pendingInvoices);
+        return ResponseEntity.ok(ApiResponse.success(responseDtoList));
     }
 
+
     @PatchMapping("/{invoiceId}/due-date")
-    public ResponseEntity<Void> updateDueDate( @PathVariable Long invoiceId, @Valid @RequestBody UpdateDueDateRequest request) {
+    public ResponseEntity<ApiResponse<Void>> updateDueDate(@PathVariable Long invoiceId, @Valid @RequestBody UpdateDueDateRequest request) {
         invoiceCommandUseCase.updateDueDate(invoiceId, request.getNewDueDate());
-        return ResponseEntity.ok().build();
+
+        // <<< 4. RESPUESTA PARA OPERACIONES SIN CONTENIDO (VOID)
+        // Usamos ApiResponse.success(null, message) para confirmar la operación.
+        return ResponseEntity.ok(ApiResponse.success(null, "La fecha de vencimiento de la factura ha sido actualizada correctamente."));
     }
 
     @GetMapping("invoices/by-enterprise/{enterpriseId}")
-    public ResponseEntity<List<InvoicePendingResponse>> getInvoicesByEnterpriseId(@PathVariable String enterpriseId) {
-        var pendingInvoices = invoiceQueryUseCase.findInvoicesByEnterpriseId(enterpriseId);
-        return ResponseEntity.ok(invoiceRestMapper.toInvoicePendingResponseList(pendingInvoices));
+    public ResponseEntity<ApiResponse<List<InvoicePendingResponse>>> getInvoicesByEnterpriseId(@PathVariable String enterpriseId) {
+        List<InvoiceReplica> invoices = invoiceQueryUseCase.findInvoicesByEnterpriseId(enterpriseId);
+
+        if (invoices.isEmpty()) {
+            return ResponseEntity.ok(ApiResponse.successEmpty("No se encontraron facturas para la empresa.", "NO_CONTENT"));
+        }
+        
+        return ResponseEntity.ok(ApiResponse.success(invoiceRestMapper.toInvoicePendingResponseList(invoices)));
     }
 
     @GetMapping("invoices/pending/by-enterprise/{enterpriseId}")
-    public ResponseEntity<List<InvoicePendingResponse>> getPendingInvoicesByEnterpriseId(@PathVariable String enterpriseId) {
-        var pendingInvoices = invoiceQueryUseCase.findPendingInvoicesByEnterpriseId(enterpriseId);
-        return ResponseEntity.ok(invoiceRestMapper.toInvoicePendingResponseList(pendingInvoices));
+    public ResponseEntity<ApiResponse<List<InvoicePendingResponse>>> getPendingInvoicesByEnterpriseId(@PathVariable String enterpriseId) {
+        List<InvoiceReplica> pendingInvoices = invoiceQueryUseCase.findPendingInvoicesByEnterpriseId(enterpriseId);
+
+        if (pendingInvoices.isEmpty()) {
+            return ResponseEntity.ok(ApiResponse.successEmpty("No se encontraron facturas pendientes para la empresa.", "NO_CONTENT"));
+        }
+
+        return ResponseEntity.ok(ApiResponse.success(invoiceRestMapper.toInvoicePendingResponseList(pendingInvoices)));
     }
 
     @GetMapping("invoices/status/by-client/{clientId}/{status}")
-    public ResponseEntity<List<InvoicePendingResponse>> getStatusInvoicesByClientId(
+    public ResponseEntity<ApiResponse<List<InvoicePendingResponse>>> getStatusInvoicesByClientId(
             @PathVariable Long clientId,
             @PathVariable InvoiceStatus status) {
-        var invoices = invoiceQueryUseCase.findStatusInvoicesByClientId(clientId, status);
-        return ResponseEntity.ok(invoiceRestMapper.toInvoicePendingResponseList(invoices));
+        List<InvoiceReplica> invoices = invoiceQueryUseCase.findStatusInvoicesByClientId(clientId, status);
+
+        if (invoices.isEmpty()) {
+            return ResponseEntity.ok(
+                ApiResponse.successEmpty("No se encontraron facturas con el estado '" + status + "' para el cliente.", "NO_CONTENT")
+            );
+        }
+
+        return ResponseEntity.ok(ApiResponse.success(invoiceRestMapper.toInvoicePendingResponseList(invoices)));
     }
 
     @GetMapping("/expiring")
-    public ResponseEntity<List<InvoicePendingResponse>> getExpiringInvoices(
-            @RequestParam String enterpriseId, 
+    public ResponseEntity<ApiResponse<List<InvoicePendingResponse>>> getExpiringInvoices(
+            @RequestParam String enterpriseId,
             @RequestParam(defaultValue = "5") int days) {
-
         List<InvoiceReplica> invoices = invoiceQueryUseCase.findExpiringInvoices(enterpriseId, days);
-        
-        List<InvoicePendingResponse> response = invoiceRestMapper.toInvoicePendingResponseList(invoices);
-        
-        return ResponseEntity.ok(response);
+
+        if (invoices.isEmpty()) {
+            return ResponseEntity.ok(
+                ApiResponse.successEmpty("No se encontraron facturas por vencer en los próximos " + days + " días.", "NO_CONTENT")
+            );
+        }
+
+        return ResponseEntity.ok(ApiResponse.success(invoiceRestMapper.toInvoicePendingResponseList(invoices)));
     }
 
     @PostMapping("/trigger-reminders")
