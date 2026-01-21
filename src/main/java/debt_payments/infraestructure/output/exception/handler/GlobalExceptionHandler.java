@@ -8,6 +8,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.http.HttpStatus;
 
 import debt_payments.domain.exception.InvoiceNotFoundException;
+import debt_payments.domain.exception.MessageProcessingErrorNotFoundException;
 import debt_payments.domain.exception.PortfolioWriteOffNotFoundException;
 import debt_payments.domain.exception.ReceiptNotFoundException;
 import debt_payments.infraestructure.input.rest.dto.response.ApiResponse;
@@ -57,6 +58,18 @@ public class GlobalExceptionHandler {
                 HttpStatus status = HttpStatus.NOT_FOUND;
                 ApiResponse<Object> apiResponse = ApiResponse.error(ex.getMessage(), "WRITEOFF_NOT_FOUND", status,
                                 getRequestPath(request));
+                return new ResponseEntity<>(apiResponse, status);
+        }
+
+        @ExceptionHandler(MessageProcessingErrorNotFoundException.class)
+        public ResponseEntity<ApiResponse<Object>> handleMessageProcessingErrorNotFoundException(
+                        MessageProcessingErrorNotFoundException ex, WebRequest request) {
+                
+                log.info("MessageProcessingErrorNotFoundException: {} at path {}", ex.getMessage(), getRequestPath(request));
+                HttpStatus status = HttpStatus.NOT_FOUND; 
+                ApiResponse<Object> apiResponse = ApiResponse.error(ex.getMessage(), "MESSAGE_ERROR_NOT_FOUND", status,
+                                getRequestPath(request));
+
                 return new ResponseEntity<>(apiResponse, status);
         }
 
