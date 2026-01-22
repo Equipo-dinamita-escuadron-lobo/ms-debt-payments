@@ -22,6 +22,6 @@ public class PortfolioWriteOffEventDto {
     private Long thirdId;
     private WriteOffStatus status;
     private String enterpriseId;
-    private Long costCenterId;
+    private Long centerCostId;
     private List<WriteOffDetailEventDto> details;
 }
