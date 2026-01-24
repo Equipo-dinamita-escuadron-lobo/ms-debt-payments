@@ -56,6 +56,9 @@ public class InvoiceService implements IInvoiceCommandUseCase, IInvoiceQueryUseC
         if (invoice.getStatus() == InvoiceStatus.PAID) 
             throw new IllegalStateException("No se puede cambiar la fecha de vencimiento de una factura ya pagada.");
 
+        if (!newDueDate.isAfter(LocalDate.now()))
+            throw new IllegalArgumentException("La nueva fecha de vencimiento no puede ser una fecha pasada."); 
+
         invoice.setExpirationDate(newDueDate);
         invoice.validateDates();
 

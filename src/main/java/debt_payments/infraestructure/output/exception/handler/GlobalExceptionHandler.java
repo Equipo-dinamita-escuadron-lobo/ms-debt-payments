@@ -1,10 +1,13 @@
 package debt_payments.infraestructure.output.exception.handler;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
+
 import org.springframework.http.HttpStatus;
 
 import debt_payments.domain.exception.InvoiceNotFoundException;
@@ -26,6 +29,27 @@ public class GlobalExceptionHandler {
         // Método helper para obtener la URI
         private String getRequestPath(WebRequest request) {
                 return ((ServletWebRequest) request).getRequest().getRequestURI();
+        }
+
+        @ExceptionHandler(MethodArgumentNotValidException.class)
+        public ResponseEntity<ApiResponse<Object>> handleMethodArgumentNotValidException(
+                        MethodArgumentNotValidException ex,
+                        WebRequest request) {
+
+                // Tomamos el PRIMER error de validación
+                FieldError fieldError = ex.getBindingResult().getFieldErrors().get(0);
+
+                String message = fieldError.getDefaultMessage();
+
+                HttpStatus status = HttpStatus.BAD_REQUEST;
+
+                ApiResponse<Object> apiResponse = ApiResponse.error(
+                                message,
+                                "VALIDATION_ERROR",
+                                status,
+                                getRequestPath(request));
+
+                return new ResponseEntity<>(apiResponse, status);
         }
 
         // --- MANEJADORES PARA EXCEPCIONES "NOT FOUND" (404) ---
@@ -64,9 +88,10 @@ public class GlobalExceptionHandler {
         @ExceptionHandler(MessageProcessingErrorNotFoundException.class)
         public ResponseEntity<ApiResponse<Object>> handleMessageProcessingErrorNotFoundException(
                         MessageProcessingErrorNotFoundException ex, WebRequest request) {
-                
-                log.info("MessageProcessingErrorNotFoundException: {} at path {}", ex.getMessage(), getRequestPath(request));
-                HttpStatus status = HttpStatus.NOT_FOUND; 
+
+                log.info("MessageProcessingErrorNotFoundException: {} at path {}", ex.getMessage(),
+                                getRequestPath(request));
+                HttpStatus status = HttpStatus.NOT_FOUND;
                 ApiResponse<Object> apiResponse = ApiResponse.error(ex.getMessage(), "MESSAGE_ERROR_NOT_FOUND", status,
                                 getRequestPath(request));
 

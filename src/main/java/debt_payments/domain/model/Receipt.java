@@ -72,7 +72,7 @@ public class Receipt implements ResourceUsageProvider {
         receipt.thirdPartyId = thirdPartyId;
         receipt.paymentMethodId = paymentMethodId;
         receipt.observations = observations;
-        receipt.details.addAll(details);
+        receipt.details = new ArrayList<>(details);
         receipt.status = ReceiptStatus.FINALIZED;
         receipt.issueDate = LocalDate.now();
         return receipt;
@@ -123,6 +123,10 @@ public class Receipt implements ResourceUsageProvider {
             throws Exception {
         if (this.receiptType != ReceiptType.INVOICE_PAYMENT) {
             return Collections.emptyList();
+        }
+
+        if(this.details == null || this.details.isEmpty()) {
+            throw new IllegalStateException("Invoice payment receipt must have at least one detail.");
         }
 
         this.calculateTotalFromDetails(); // Asegura que el total sea correcto

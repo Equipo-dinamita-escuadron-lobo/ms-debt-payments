@@ -3,6 +3,7 @@ package debt_payments.infraestructure.input.rest.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -60,7 +61,7 @@ public class InvoiceController {
         return ResponseEntity.ok(ApiResponse.success(responseDtoList));
     }
 
-
+    //@PreAuthorize("hasAuthority('Update_Invoice_DueDate')")
     @PatchMapping("/{invoiceId}/due-date")
     public ResponseEntity<ApiResponse<Void>> updateDueDate(@PathVariable Long invoiceId, @Valid @RequestBody UpdateDueDateRequest request) {
         invoiceCommandUseCase.updateDueDate(invoiceId, request.getNewDueDate());
