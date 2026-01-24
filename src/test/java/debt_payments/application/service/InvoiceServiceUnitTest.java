@@ -138,5 +138,91 @@ public class InvoiceServiceUnitTest {
         assertThatThrownBy(() -> invoiceService.findInvoiceById(123L))
                 .isInstanceOf(InvoiceNotFoundException.class);
     }
+
+    // ==================== Tests para validaciones de fecha de vencimiento ====================
+
+    @Test
+    @DisplayName("updateDueDate should throw when new date is in the past")
+    void updateDueDate_pastDate_throws() {
+        var invoice = invoiceReplicaDefault(11L);
+        when(invoiceProviderPort.findInvoiceById(11L)).thenReturn(Optional.of(invoice));
+
+        LocalDate pastDate = LocalDate.now().minusDays(5);
+
+        assertThatThrownBy(() -> invoiceService.updateDueDate(11L, pastDate))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("La nueva fecha de vencimiento no puede ser una fecha pasada");
+    }
+
+    @Test
+    @DisplayName("updateDueDate should throw when new date is today")
+    void updateDueDate_todayDate_throws() {
+        var invoice = invoiceReplicaDefault(12L);
+        when(invoiceProviderPort.findInvoiceById(12L)).thenReturn(Optional.of(invoice));
+
+        LocalDate today = LocalDate.now();
+
+        assertThatThrownBy(() -> invoiceService.updateDueDate(12L, today))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("La nueva fecha de vencimiento no puede ser una fecha pasada");
+    }
+
+    @Test
+    @DisplayName("updateDueDate should accept future dates successfully")
+    void updateDueDate_futureDate_success() {
+        var invoice = invoiceReplicaDefault(13L);
+        InvoiceReplica spyInv = spy(invoice);
+        when(invoiceProviderPort.findInvoiceById(13L)).thenReturn(Optional.of(spyInv));
+
+        LocalDate futureDate = LocalDate.now().plusDays(30);
+
+        invoiceService.updateDueDate(13L, futureDate);
+
+        verify(spyInv).setExpirationDate(futureDate);
+        verify(invoiceProviderPort).updateInvoice(spyInv);
+        assertThat(spyInv.getExpirationDate()).isEqualTo(futureDate);
+    }
+
+    @Test
+    @DisplayName("updateDueDate should work with PENDING status invoices")
+    void updateDueDate_pendingStatus_success() {
+        var pendingInvoice = invoiceReplicaWith(14L, 100000L, 50000L, InvoiceStatus.PENDING);
+        InvoiceReplica spyInv = spy(pendingInvoice);
+        when(invoiceProviderPort.findInvoiceById(14L)).thenReturn(Optional.of(spyInv));
+
+        LocalDate futureDate = LocalDate.now().plusDays(20);
+
+        invoiceService.updateDueDate(14L, futureDate);
+
+        verify(invoiceProviderPort).updateInvoice(spyInv);
+    }
+
+    @Test
+    @DisplayName("updateDueDate should work with PARTIAL_PAYMENT status invoices")
+    void updateDueDate_partialPaymentStatus_success() {
+        var partialInvoice = invoiceReplicaWith(15L, 100000L, 30000L, InvoiceStatus.PENDING);
+        InvoiceReplica spyInv = spy(partialInvoice);
+        when(invoiceProviderPort.findInvoiceById(15L)).thenReturn(Optional.of(spyInv));
+
+        LocalDate futureDate = LocalDate.now().plusDays(25);
+
+        invoiceService.updateDueDate(15L, futureDate);
+
+        verify(invoiceProviderPort).updateInvoice(spyInv);
+    }
+
+    @Test
+    @DisplayName("updateDueDate should throw for WRITTEN_OFF status invoices")
+    void updateDueDate_writtenOffStatus_throws() {
+        var writtenOffInvoice = invoiceReplicaWith(16L, 100000L, 0L, InvoiceStatus.WRITTEN_OFF);
+        when(invoiceProviderPort.findInvoiceById(16L)).thenReturn(Optional.of(writtenOffInvoice));
+
+        LocalDate futureDate = LocalDate.now().plusDays(30);
+
+        // WRITTEN_OFF no es PAID, pero debe permitirse para consistencia
+        invoiceService.updateDueDate(16L, futureDate);
+
+        verify(invoiceProviderPort).updateInvoice(writtenOffInvoice);
+    }
 }
 

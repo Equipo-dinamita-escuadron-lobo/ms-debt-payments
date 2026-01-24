@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -38,6 +39,7 @@ public class ReceiptController {
     private final IReceiptQueryUseCase receiptQueryUseCase;
     private final IReceiptRestMapper receiptRestMapper;
 
+    //@PreAuthorize("hasAuthority('Create_Receipt')")
     @PostMapping("/")
     public ResponseEntity<ApiResponse<ReceiptResponse>> createReceipt(
             @Valid @RequestBody ReceiptCreateRequest request) {
@@ -52,6 +54,7 @@ public class ReceiptController {
                 .body(ApiResponse.success(responseDto, "Recibo creado exitosamente."));
     }
 
+    //@PreAuthorize("hasAuthority('Void_Receipt')")
     @PutMapping("/{id}/void")
     public ResponseEntity<ApiResponse<ReceiptResponse>> voidReceipt(@PathVariable Long id,
             @Valid @RequestBody VoidReceiptRequest request) {

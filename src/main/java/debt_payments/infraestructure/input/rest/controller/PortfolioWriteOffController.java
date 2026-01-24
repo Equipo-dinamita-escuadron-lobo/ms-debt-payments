@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -50,6 +51,7 @@ public class PortfolioWriteOffController {
     private final IPortfolioWriteOffRestMapper portfolioWriteOffRestMapper;
     private final IInvoiceProviderPort invoiceProviderPort;
 
+    @PreAuthorize("hasAuthority('Create_WriteOff')")
     @PostMapping("/")
     public ResponseEntity<ApiResponse<PortfolioWriteOffResponse>> createWriteOff(
             @Valid @RequestBody CreateWriteOffRequest request) {
@@ -87,6 +89,7 @@ public class PortfolioWriteOffController {
                 .body(ApiResponse.success(responseDto, "Castigo de cartera creado exitosamente."));
     }
 
+    @PreAuthorize("hasAuthority('Confirm_WriteOff')")
     @PutMapping("/{id}/confirm")
     public ResponseEntity<ApiResponse<PortfolioWriteOffResponse>> confirmWriteOff(@PathVariable Long id) {
         PortfolioWriteOff confirmedDomain = commandUseCase.confirmWriteOff(id);
@@ -94,6 +97,7 @@ public class PortfolioWriteOffController {
         return ResponseEntity.ok(ApiResponse.success(responseDto, "Castigo de cartera confirmado."));
     }
 
+    @PreAuthorize("hasAuthority('Void_WriteOff')")
     @PutMapping("/{id}/void")
     public ResponseEntity<ApiResponse<PortfolioWriteOffResponse>> voidWriteOff(@PathVariable Long id) {
         PortfolioWriteOff voidedDomain = commandUseCase.voidWriteOffConfirmation(id);

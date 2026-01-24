@@ -10,6 +10,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import debt_payments.domain.enums.InvoiceStatus;
+import debt_payments.domain.enums.ReceiptType;
 import debt_payments.domain.model.Replica.InvoiceReplica;
 import debt_payments.test.fixtures.TestFixtures;
 
@@ -188,6 +189,81 @@ public class ReceiptUnitTest {
         assertThat(inv.getTotalPay()).isEqualTo(500L); // 200 + 300
         assertThat(detail.getInvoiceCode()).isEqualTo(inv.getFactCode());
         assertThat(detail.getAccountingAccount()).isEqualTo(inv.getAccountingAccount());
+    }
+
+    // ==================== Tests para nueva validación createForInvoicePayment ====================
+
+    @Test
+    @DisplayName("createForInvoicePayment throws when details is null")
+    void createForInvoicePaymentThrowsWhenDetailsNull() {
+        assertThatThrownBy(() -> Receipt.createForInvoicePayment(
+                "ENT-1", 1L, 1L, "obs", null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Invoice payment receipt must have at least one detail");
+    }
+
+    @Test
+    @DisplayName("createForInvoicePayment throws when details is empty")
+    void createForInvoicePaymentThrowsWhenDetailsEmpty() {
+        assertThatThrownBy(() -> Receipt.createForInvoicePayment(
+                "ENT-1", 1L, 1L, "obs", List.of()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Invoice payment receipt must have at least one detail");
+    }
+
+    @Test
+    @DisplayName("createForInvoicePayment succeeds with single detail")
+    void createForInvoicePaymentSucceedsWithSingleDetail() {
+        var detail = TestFixtures.receiptDetail(1L, 100L);
+        var receipt = Receipt.createForInvoicePayment("ENT-1", 5L, 10L, "obs", List.of(detail));
+
+        assertThat(receipt).isNotNull();
+        assertThat(receipt.getReceiptType()).isEqualTo(ReceiptType.INVOICE_PAYMENT);
+        assertThat(receipt.getEnterpriseId()).isEqualTo("ENT-1");
+        assertThat(receipt.getThirdPartyId()).isEqualTo(5L);
+        assertThat(receipt.getPaymentMethodId()).isEqualTo(10L);
+        assertThat(receipt.getObservations()).isEqualTo("obs");
+        assertThat(receipt.getDetails()).hasSize(1);
+        assertThat(receipt.getStatus()).isEqualTo(ReceiptStatus.FINALIZED);
+        assertThat(receipt.getIssueDate()).isEqualTo(java.time.LocalDate.now());
+    }
+
+    @Test
+    @DisplayName("createForInvoicePayment succeeds with multiple details")
+    void createForInvoicePaymentSucceedsWithMultipleDetails() {
+        var details = List.of(
+                TestFixtures.receiptDetail(1L, 100L),
+                TestFixtures.receiptDetail(2L, 200L),
+                TestFixtures.receiptDetail(3L, 150L)
+        );
+        var receipt = Receipt.createForInvoicePayment("ENT-2", 8L, 5L, "multi", details);
+
+        assertThat(receipt.getDetails()).hasSize(3);
+        assertThat(receipt.getReceiptType()).isEqualTo(ReceiptType.INVOICE_PAYMENT);
+    }
+
+    @Test
+    @DisplayName("processInvoicePayments throws IllegalStateException when details null")
+    void processInvoicePaymentsThrowsWhenDetailsNull() {
+        var receipt = new Receipt();
+        receipt.setReceiptType(ReceiptType.INVOICE_PAYMENT);
+        receipt.setDetails(null);
+
+        assertThatThrownBy(() -> receipt.processInvoicePayments(id -> Optional.empty()))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Invoice payment receipt must have at least one detail");
+    }
+
+    @Test
+    @DisplayName("processInvoicePayments throws IllegalStateException when details empty")
+    void processInvoicePaymentsThrowsWhenDetailsEmpty() {
+        var receipt = new Receipt();
+        receipt.setReceiptType(ReceiptType.INVOICE_PAYMENT);
+        receipt.setDetails(List.of());
+
+        assertThatThrownBy(() -> receipt.processInvoicePayments(id -> Optional.empty()))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Invoice payment receipt must have at least one detail");
     }
 }
 
