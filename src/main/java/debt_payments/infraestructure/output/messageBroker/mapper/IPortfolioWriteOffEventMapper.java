@@ -19,5 +19,6 @@ public interface IPortfolioWriteOffEventMapper {
      * @return the mapped PortfolioWriteOffEventDto object
      */
     @Mapping(target = "details", ignore = true)
+    @Mapping(source = "costCenterId", target = "centerCostId")
     PortfolioWriteOffEventDto toEventDto(PortfolioWriteOff domain);
 }
