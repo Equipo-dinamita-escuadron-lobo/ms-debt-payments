@@ -60,6 +60,10 @@ public class ReceiptService implements IReceiptCommandUseCase, IReceiptQueryUseC
         } catch (Exception e) {
             throw new IllegalStateException("Error processing invoice payments: " + e.getMessage(), e);
         }
+
+        if(receipt.getLedgerAccountId() == null && !receipt.isInvoicePayment())
+            throw new IllegalArgumentException("Ledger account ID is null.");
+
         receipt.setStatus(ReceiptStatus.FINALIZED);
         receipt.setIssueDate(LocalDate.now());
         Receipt savedReceipt = receiptCommandPersistencePort.save(receipt);
