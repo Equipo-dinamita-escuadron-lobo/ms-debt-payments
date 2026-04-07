@@ -23,9 +23,10 @@ public interface IReceiptQueryUseCase {
     /**
      * @brief Finds receipts by the associated third party ID.
      * @param thirdPartyId The ID of the third party.
+     * @param enterpriseId Thie ID of the enterprise 
      * @return A list of receipts associated with the given third party ID.
      */
-    List<Receipt> findByThirdPartyId(String thirdPartyId);
+    List<Receipt> findByThirdPartyId(String thirdPartyId, String enterpriseId);
     
     /**
      * @brief Finds receipts by the associated enterprise ID.

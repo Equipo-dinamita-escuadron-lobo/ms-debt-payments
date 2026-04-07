@@ -120,8 +120,8 @@ public class ReceiptService implements IReceiptCommandUseCase, IReceiptQueryUseC
 
     @Override
     @Transactional(readOnly = true)
-    public List<Receipt> findByThirdPartyId(String thirdPartyId) {
-        return receiptQueryPersistencePort.findByThirdPartyId(thirdPartyId);
+    public List<Receipt> findByThirdPartyId(String thirdPartyId, String enterpriseId) {
+        return receiptQueryPersistencePort.findByThirdPartyId(thirdPartyId, enterpriseId);
     }
 
     @Override

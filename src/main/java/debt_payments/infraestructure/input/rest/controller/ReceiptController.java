@@ -99,9 +99,9 @@ public class ReceiptController {
         return ResponseEntity.ok(ApiResponse.success(receiptRestMapper.toResponseList(receipts)));
     }
 
-    @GetMapping("/by-third/{thirdId}")
-    public ResponseEntity<ApiResponse<List<ReceiptResponse>>> getAllReceiptsByThird(@PathVariable String thirdId) {
-        List<Receipt> receipts = receiptQueryUseCase.findByThirdPartyId(thirdId);
+    @GetMapping("/by-third/{thirdId}/{enterpriseId}")
+    public ResponseEntity<ApiResponse<List<ReceiptResponse>>> getAllReceiptsByThird(@PathVariable String thirdId, @PathVariable String enterpriseId) {
+        List<Receipt> receipts = receiptQueryUseCase.findByThirdPartyId(thirdId, enterpriseId);
 
         if (receipts.isEmpty()) {
             return ResponseEntity.ok(

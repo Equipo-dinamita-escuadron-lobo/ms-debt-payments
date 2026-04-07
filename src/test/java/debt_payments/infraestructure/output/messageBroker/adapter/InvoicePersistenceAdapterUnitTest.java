@@ -120,13 +120,13 @@ public class InvoicePersistenceAdapterUnitTest {
     void findPendingInvoicesByClientId_mapsListThroughMapper() {
         InvoiceReplicaEntity e = new InvoiceReplicaEntity();
         e.setId(21L);
-        when(repository.findByThirdIdAndPendingValueGreaterThan(5L, 0L)).thenReturn(List.of(e));
+        when(repository.findByThirdIdAndEntIdAndPendingValueGreaterThan(5L,"ENT-1", 0L)).thenReturn(List.of(e));
 
         InvoiceReplica domain = TestFixtures.invoiceReplicaWith(21L, 1000L, 100L, null);
         when(mapper.toInvoiceReplicaList(List.of(e))).thenReturn(List.of(domain));
 
         InvoicePersistenceAdapter a = adapter();
-        var list = a.findPendingInvoicesByClientId(5L);
+        var list = a.findPendingInvoicesByClientIdAndEnterpriseId(5L, "ENT-1");
 
         assertThat(list).hasSize(1).contains(domain);
     }

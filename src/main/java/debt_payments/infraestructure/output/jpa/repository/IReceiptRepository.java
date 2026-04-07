@@ -19,7 +19,7 @@ public interface IReceiptRepository extends JpaRepository<ReceiptEntity, Long> {
 
     Optional<ReceiptEntity> findById(Long id);
 
-    List<ReceiptEntity> findByThirdPartyId(Long thirdPartyId);
+    List<ReceiptEntity> findByThirdPartyIdAndEnterpriseId(Long thirdPartyId, String enterpriseId);
 
     List<ReceiptEntity> findAllByEnterpriseId(String enterpriseId);
 

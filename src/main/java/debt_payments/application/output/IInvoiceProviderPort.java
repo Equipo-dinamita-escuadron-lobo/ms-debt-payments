@@ -27,9 +27,10 @@ public interface IInvoiceProviderPort {
     /**
      * @brief Obtains a list of invoices with pending balance for a specific client.
      * @param clientId The ID of the client.
+     * @param enterpriseId The ID of Enterprise
      * @return A list of InvoiceReplica domain models.
      */
-    List<InvoiceReplica> findPendingInvoicesByClientId(Long clientId);
+    List<InvoiceReplica> findPendingInvoicesByClientIdAndEnterpriseId(Long clientId, String enterpriseId);
 
     /**
      * @brief Finds a list of invoices by their IDs.
@@ -58,9 +59,10 @@ public interface IInvoiceProviderPort {
      * @brief Finds invoices by client ID and status.
      * @param clientId The ID of the client.
      * @param status The status of the invoices to filter.
+     * @param enterpriseId The ID of the enterprise to query.
      * @return A list of InvoiceReplica domain objects representing the invoices with the specified status for the client.
      */
-    List<InvoiceReplica> findStatusInvoicesByClientId(Long clientId, InvoiceStatus status);
+    List<InvoiceReplica> findStatusInvoicesByClientId(Long clientId, InvoiceStatus status, String enterpriseId);
 
     /**
      * @brief Finds invoices of an enterprise with a specific status and whose expiration date
