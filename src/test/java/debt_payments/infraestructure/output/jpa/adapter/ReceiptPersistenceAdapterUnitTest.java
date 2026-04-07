@@ -71,13 +71,13 @@ public class ReceiptPersistenceAdapterUnitTest {
         var byInvoice = adapter.findByInvoiceId("1");
         assertThat(byInvoice).containsExactly(r1);
 
-        when(receiptRepository.findByThirdPartyIdAndEnterpriseId(anyLong(), "ENT-1")).thenReturn(List.of(e1));
+        when(receiptRepository.findByThirdPartyIdAndEnterpriseId(anyLong(), eq("ENT-1"))).thenReturn(List.of(e1));
         when(receiptMapper.toDomainList(List.of(e1))).thenReturn(List.of(r1));
 
         var byThird = adapter.findByThirdPartyId("1", "ENT-1");
         assertThat(byThird).containsExactly(r1);
 
-        when(receiptRepository.findAllByEnterpriseId("ENT-1")).thenReturn(List.of(e1));
+        when(receiptRepository.findAllByEnterpriseId(eq("ENT-1"))).thenReturn(List.of(e1));
         when(receiptMapper.toDomainList(List.of(e1))).thenReturn(List.of(r1));
 
         var byEnt = adapter.findByEnterpriseId("ENT-1");
