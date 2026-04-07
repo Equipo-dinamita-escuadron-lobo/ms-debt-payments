@@ -23,9 +23,10 @@ public interface IReceiptQueryPersistencePort {
     /**
      * @brief Find receipts by third party ID.
      * @param thirdPartyId The ID of the third party.
+     * @param enterpriseId The ID of the enterprise
      * @return A list of Receipt domain objects associated with the given third party ID.
      */
-    List<Receipt> findByThirdPartyId(String thirdPartyId);
+    List<Receipt> findByThirdPartyId(String thirdPartyId, String enterpriseId);
 
     /**
      * @brief Find receipts by enterprise ID.

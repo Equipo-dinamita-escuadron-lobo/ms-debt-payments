@@ -22,7 +22,7 @@ public interface IInvoiceRepository extends JpaRepository<InvoiceReplicaEntity, 
      * @param pendingValue El valor contra el que se compara el saldo pendiente (normalmente cero).
      * @return Una lista de entidades de facturas con saldo pendiente.
      */
-    List<InvoiceReplicaEntity> findByThirdIdAndPendingValueGreaterThan(Long thirdId, Long pendingValue);
+    List<InvoiceReplicaEntity> findByThirdIdAndEntIdAndPendingValueGreaterThan(Long thirdId, String entId, Long pendingValue);
 
     /**
      * Encuentra todas las facturas de un cliente específico (ThirdParty) con un estado específico.
@@ -31,7 +31,7 @@ public interface IInvoiceRepository extends JpaRepository<InvoiceReplicaEntity, 
      * @param status El estado de la factura.
      * @return Una lista de entidades de facturas con el estado especificado.
      */
-    List<InvoiceReplicaEntity> findByThirdIdAndStatus(Long thirdId, InvoiceStatus status);
+    List<InvoiceReplicaEntity> findByThirdIdAndStatusAndEntId(Long thirdId, InvoiceStatus status, String entId);
 
     /**
      * Busca todas las entidades de factura cuyos IDs están en la lista proporcionada.

@@ -66,8 +66,8 @@ public class InvoiceService implements IInvoiceCommandUseCase, IInvoiceQueryUseC
     }
 
     @Override
-    public List<InvoiceReplica> findPendingInvoicesByClientId(Long clientId) {
-        return invoiceProviderPort.findPendingInvoicesByClientId(clientId);
+    public List<InvoiceReplica> findPendingInvoicesByClientIdAndEnterpriseId(Long clientId, String enterpriseId) {
+        return invoiceProviderPort.findPendingInvoicesByClientIdAndEnterpriseId(clientId, enterpriseId);
     }
 
     @Override
@@ -87,8 +87,8 @@ public class InvoiceService implements IInvoiceCommandUseCase, IInvoiceQueryUseC
     }
 
     @Override
-    public List<InvoiceReplica> findStatusInvoicesByClientId(Long clientId, InvoiceStatus status) {
-        return invoiceProviderPort.findStatusInvoicesByClientId(clientId, status);
+    public List<InvoiceReplica> findStatusInvoicesByClientId(Long clientId, InvoiceStatus status, String enterpriseId) {
+        return invoiceProviderPort.findStatusInvoicesByClientId(clientId, status, enterpriseId);
     }
 
     @Override

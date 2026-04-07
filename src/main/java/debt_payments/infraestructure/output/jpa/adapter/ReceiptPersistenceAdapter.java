@@ -45,8 +45,8 @@ public class ReceiptPersistenceAdapter implements IReceiptCommandPersistencePort
     }
 
     @Override
-    public List<Receipt> findByThirdPartyId(String thirdPartyId) {
-        List<ReceiptEntity> entityList = receiptRepository.findByThirdPartyId(Long.valueOf(thirdPartyId));
+    public List<Receipt> findByThirdPartyId(String thirdPartyId, String enterpriseId) {
+        List<ReceiptEntity> entityList = receiptRepository.findByThirdPartyIdAndEnterpriseId(Long.valueOf(thirdPartyId), enterpriseId);
         return receiptMapper.toDomainList(entityList);
     }
 

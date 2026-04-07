@@ -12,15 +12,16 @@ public interface IInvoiceQueryUseCase {
      * @param clientId The ID of the client to query.
      * @return List of invoices with pending balance.
      */
-    List<InvoiceReplica> findPendingInvoicesByClientId(Long clientId);
+    List<InvoiceReplica> findPendingInvoicesByClientIdAndEnterpriseId(Long clientId, String enterpriseId);
 
     /**
      * Use case to find invoices by client ID and status.
      * @param clientId The ID of the client to query.
      * @param status The status of the invoices to filter.
+     * @param enterpriseId The ID of the enterprise to query.  
      * @return List of invoices of the client with the specified status.
      */
-    List<InvoiceReplica> findStatusInvoicesByClientId(Long clientId, InvoiceStatus status);
+    List<InvoiceReplica> findStatusInvoicesByClientId(Long clientId, InvoiceStatus status, String enterpriseId);
 
     /**
      * Use case to find pending invoices by enterprise ID.

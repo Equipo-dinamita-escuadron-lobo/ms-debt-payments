@@ -76,8 +76,8 @@ public class InvoicePersistenceAdapter implements IInvoiceProviderPort {
     }
 
     @Override
-    public List<InvoiceReplica> findPendingInvoicesByClientId(Long clientId) {
-        var invoiceEntityList = invoiceRepository.findByThirdIdAndPendingValueGreaterThan(clientId, 0L);
+    public List<InvoiceReplica> findPendingInvoicesByClientIdAndEnterpriseId(Long clientId, String enterpriseId) {
+        var invoiceEntityList = invoiceRepository.findByThirdIdAndEntIdAndPendingValueGreaterThan(clientId, enterpriseId, 0L);
         return invoiceMapper.toInvoiceReplicaList(invoiceEntityList);
     }
 
@@ -100,8 +100,8 @@ public class InvoicePersistenceAdapter implements IInvoiceProviderPort {
     }
 
     @Override
-    public List<InvoiceReplica> findStatusInvoicesByClientId(Long clientId, InvoiceStatus status) {
-        var invoiceEntityList = invoiceRepository.findByThirdIdAndStatus(clientId, status);
+    public List<InvoiceReplica> findStatusInvoicesByClientId(Long clientId, InvoiceStatus status, String enterpriseId) {
+        var invoiceEntityList = invoiceRepository.findByThirdIdAndStatusAndEntId(clientId, status, enterpriseId);
         return invoiceMapper.toInvoiceReplicaList(invoiceEntityList);
     }
 

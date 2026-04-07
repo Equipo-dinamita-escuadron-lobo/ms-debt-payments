@@ -47,9 +47,9 @@ public class InvoiceController {
         return ResponseEntity.ok(ApiResponse.success(responseDto));
     }
 
-    @GetMapping("/pending/client/{clientId}")
-    public ResponseEntity<ApiResponse<List<InvoicePendingResponse>>> getPendingInvoicesByClient(@PathVariable Long clientId) {
-        List<InvoiceReplica> pendingInvoices = invoiceQueryUseCase.findStatusInvoicesByClientId(clientId, InvoiceStatus.PENDING);
+    @GetMapping("/pending/client/{clientId}/enterprise/{enterpriseId}")
+    public ResponseEntity<ApiResponse<List<InvoicePendingResponse>>> getPendingInvoicesByClient(@PathVariable Long clientId, @PathVariable String enterpriseId) {
+        List<InvoiceReplica> pendingInvoices = invoiceQueryUseCase.findStatusInvoicesByClientId(clientId, InvoiceStatus.PENDING, enterpriseId);
 
         if (pendingInvoices.isEmpty()) {
             return ResponseEntity.ok(
@@ -93,11 +93,12 @@ public class InvoiceController {
         return ResponseEntity.ok(ApiResponse.success(invoiceRestMapper.toInvoicePendingResponseList(pendingInvoices)));
     }
 
-    @GetMapping("invoices/status/by-client/{clientId}/{status}")
+    @GetMapping("invoices/status/by-client/{clientId}/{status}/{enterpriseId}")
     public ResponseEntity<ApiResponse<List<InvoicePendingResponse>>> getStatusInvoicesByClientId(
             @PathVariable Long clientId,
-            @PathVariable InvoiceStatus status) {
-        List<InvoiceReplica> invoices = invoiceQueryUseCase.findStatusInvoicesByClientId(clientId, status);
+            @PathVariable InvoiceStatus status,
+            @PathVariable String enterpriseId) {
+        List<InvoiceReplica> invoices = invoiceQueryUseCase.findStatusInvoicesByClientId(clientId, status, enterpriseId);
 
         if (invoices.isEmpty()) {
             return ResponseEntity.ok(

@@ -114,8 +114,8 @@ public class InvoiceServiceUnitTest {
     void findDelegations_delegates() {
         var list = List.of(invoiceReplicaDefault(1L));
 
-        when(invoiceProviderPort.findPendingInvoicesByClientId(7L)).thenReturn(list);
-        assertThat(invoiceService.findPendingInvoicesByClientId(7L)).isEqualTo(list);
+        when(invoiceProviderPort.findPendingInvoicesByClientIdAndEnterpriseId(7L, "ENT-1")).thenReturn(list);
+        assertThat(invoiceService.findPendingInvoicesByClientIdAndEnterpriseId(7L, "ENT-1")).isEqualTo(list);
 
         when(invoiceProviderPort.findInvoicesByEnterpriseId("ENT-A")).thenReturn(list);
         assertThat(invoiceService.findInvoicesByEnterpriseId("ENT-A")).isEqualTo(list);
@@ -123,8 +123,8 @@ public class InvoiceServiceUnitTest {
         when(invoiceProviderPort.findPendingInvoicesByEnterpriseId("ENT-A")).thenReturn(list);
         assertThat(invoiceService.findPendingInvoicesByEnterpriseId("ENT-A")).isEqualTo(list);
 
-        when(invoiceProviderPort.findStatusInvoicesByClientId(8L, InvoiceStatus.PENDING)).thenReturn(list);
-        assertThat(invoiceService.findStatusInvoicesByClientId(8L, InvoiceStatus.PENDING)).isEqualTo(list);
+        when(invoiceProviderPort.findStatusInvoicesByClientId(8L, InvoiceStatus.PENDING, "ENT-1")).thenReturn(list);
+        assertThat(invoiceService.findStatusInvoicesByClientId(8L, InvoiceStatus.PENDING, "ENT-1")).isEqualTo(list);
 
         when(invoiceProviderPort.findInvoiceById(1L)).thenReturn(Optional.of(invoiceReplicaDefault(1L)));
         assertThat(invoiceService.findInvoiceById(1L)).isNotNull();

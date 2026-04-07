@@ -225,12 +225,12 @@ public class ReceiptServiceUnitTest {
                 receiptForDirectIncome("ENT-1", 9L, 8L, "test2", 600L, 150L)
         );
 
-        when(receiptQueryPersistencePort.findByThirdPartyId("9")).thenReturn(receipts);
+        when(receiptQueryPersistencePort.findByThirdPartyId("9", "ENT-1")).thenReturn(receipts);
 
-        List<Receipt> result = receiptService.findByThirdPartyId("9");
+        List<Receipt> result = receiptService.findByThirdPartyId("9", "ENT-1");
 
         assertThat(result).hasSize(2).isEqualTo(receipts);
-        verify(receiptQueryPersistencePort).findByThirdPartyId("9");
+        verify(receiptQueryPersistencePort).findByThirdPartyId("9", "ENT-1");
     }
 
     @Test
