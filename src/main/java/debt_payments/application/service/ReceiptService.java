@@ -17,17 +17,20 @@ import debt_payments.domain.exception.ReceiptNotFoundException;
 import debt_payments.domain.model.Receipt;
 import debt_payments.domain.model.ReceiptStatus;
 import debt_payments.domain.model.Replica.InvoiceReplica;
+import debt_payments.infraestructure.output.audit.annotation.DocumentAuditable;
+import debt_payments.infraestructure.output.audit.annotation.DocumentOperationType;
 import lombok.RequiredArgsConstructor;
 
 /**
  * @brief Service class for managing receipts.
- * This class implements both command and query use cases for receipts,
- * handling operations such as creating, voiding, and retrieving receipts.
+ *        This class implements both command and query use cases for receipts,
+ *        handling operations such as creating, voiding, and retrieving
+ *        receipts.
  */
 
 @Service
 @RequiredArgsConstructor
-public class ReceiptService implements IReceiptCommandUseCase, IReceiptQueryUseCase  {
+public class ReceiptService implements IReceiptCommandUseCase, IReceiptQueryUseCase {
 
     private final IReceiptCommandPersistencePort receiptCommandPersistencePort;
     private final IReceiptQueryPersistencePort receiptQueryPersistencePort;
@@ -36,22 +39,27 @@ public class ReceiptService implements IReceiptCommandUseCase, IReceiptQueryUseC
     private final IResourceUsageNotifierPort resourceUsageNotifier;
 
     /**
-     * Creates a new receipt after validating external dependencies and generating a unique receipt code.
+     * Creates a new receipt after validating external dependencies and generating a
+     * unique receipt code.
+     * 
      * @param receipt The receipt to be created.
      * @return The created receipt with updated fields.
      */
     @Override
     @Transactional
+    @DocumentAuditable(operationType = DocumentOperationType.CREATE, moduleName = "WALLET")
     public Receipt createReceipt(Receipt receipt) {
 
         // Generar un código único para el recibo
         String uniqueCode = generateUniqueReceiptCode();
         receipt.setReceiptCode(uniqueCode);
 
-        // Si es pago a facturas, delegar la lógica al objeto de dominio para aplicar pagos
+        // Si es pago a facturas, delegar la lógica al objeto de dominio para aplicar
+        // pagos
         try {
             if (receipt.isInvoicePayment()) {
-                List<InvoiceReplica> modifiedInvoices = receipt.processInvoicePayments(invoiceProviderPort::findInvoiceById);
+                List<InvoiceReplica> modifiedInvoices = receipt
+                        .processInvoicePayments(invoiceProviderPort::findInvoiceById);
                 // Persistir las facturas modificadas
                 for (InvoiceReplica inv : modifiedInvoices) {
                     invoiceProviderPort.updateInvoice(inv);
@@ -61,14 +69,14 @@ public class ReceiptService implements IReceiptCommandUseCase, IReceiptQueryUseC
             throw new IllegalStateException("Error processing invoice payments: " + e.getMessage(), e);
         }
 
-        if(receipt.getLedgerAccountId() == null && !receipt.isInvoicePayment())
+        if (receipt.getLedgerAccountId() == null && !receipt.isInvoicePayment())
             throw new IllegalArgumentException("Ledger account ID is null.");
 
         receipt.setStatus(ReceiptStatus.FINALIZED);
         receipt.setIssueDate(LocalDate.now());
         Receipt savedReceipt = receiptCommandPersistencePort.save(receipt);
 
-        //Lineas para publicar el evento de creación
+        // Lineas para publicar el evento de creación
         accountingEventPublisher.publishReceiptCreatedEvent(savedReceipt);
         resourceUsageNotifier.notifyAll(savedReceipt.getUsageNotifications());
 
@@ -77,29 +85,33 @@ public class ReceiptService implements IReceiptCommandUseCase, IReceiptQueryUseC
 
     @Override
     @Transactional
+    @DocumentAuditable(operationType = DocumentOperationType.VOID, moduleName = "WALLET")
     public Receipt voidReceipt(Long receiptId, String reasonDescription) {
         Receipt receiptToVoid = receiptQueryPersistencePort.findById(receiptId)
-            .orElseThrow(() -> new ReceiptNotFoundException("Receipt with id " + receiptId + " does not exist."));
+                .orElseThrow(() -> new ReceiptNotFoundException("Receipt with id " + receiptId + " does not exist."));
 
         if (receiptToVoid.getStatus() == ReceiptStatus.VOIDED) {
             throw new IllegalStateException("Receipt with id " + receiptId + " is already voided.");
         }
 
-        // Delegar la anulación al objeto de dominio que devuelve las facturas modificadas
+        // Delegar la anulación al objeto de dominio que devuelve las facturas
+        // modificadas
         try {
-            List<InvoiceReplica> modifiedInvoices = receiptToVoid.voidReceipt(reasonDescription, invoiceProviderPort::findInvoiceById);
+            List<InvoiceReplica> modifiedInvoices = receiptToVoid.voidReceipt(reasonDescription,
+                    invoiceProviderPort::findInvoiceById);
             // Persistir las facturas modificadas
             for (InvoiceReplica inv : modifiedInvoices) {
                 invoiceProviderPort.updateInvoice(inv);
             }
         } catch (Exception e) {
-            throw new IllegalStateException("Error reversing invoice payments when voiding receipt: " + e.getMessage(), e);
+            throw new IllegalStateException("Error reversing invoice payments when voiding receipt: " + e.getMessage(),
+                    e);
         }
 
         // Persistir el recibo anulado
         Receipt voidedReceipt = receiptCommandPersistencePort.save(receiptToVoid);
 
-        //Lineas para publicar el evento de anulación
+        // Lineas para publicar el evento de anulación
         accountingEventPublisher.publishVoidReceiptEvent(voidedReceipt);
 
         return voidedReceipt;
@@ -109,7 +121,7 @@ public class ReceiptService implements IReceiptCommandUseCase, IReceiptQueryUseC
     @Transactional(readOnly = true)
     public Receipt findById(Long id) {
         return receiptQueryPersistencePort.findById(id)
-            .orElseThrow(() -> new ReceiptNotFoundException("El recibo con ID " + id + " no fue encontrado."));
+                .orElseThrow(() -> new ReceiptNotFoundException("El recibo con ID " + id + " no fue encontrado."));
     }
 
     @Override
