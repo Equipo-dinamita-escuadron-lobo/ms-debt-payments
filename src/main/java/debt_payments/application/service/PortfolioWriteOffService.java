@@ -14,14 +14,18 @@ import debt_payments.application.output.IResourceUsageNotifierPort;
 import debt_payments.domain.exception.PortfolioWriteOffNotFoundException;
 import debt_payments.domain.model.PortfolioWriteOff;
 import debt_payments.domain.model.Replica.InvoiceReplica;
+import debt_payments.infraestructure.output.audit.annotation.DocumentAuditable;
+import debt_payments.infraestructure.output.audit.annotation.DocumentOperationType;
 import lombok.RequiredArgsConstructor;
 
 /**
  * @brief Service class for managing portfolio write-offs.
- * This class implements both command and query use cases for portfolio write-offs,
- * handling creation, confirmation, voidance, and retrieval operations.
- * It orchestrates interactions between the domain model and various persistence
- * and notification ports.
+ *        This class implements both command and query use cases for portfolio
+ *        write-offs,
+ *        handling creation, confirmation, voidance, and retrieval operations.
+ *        It orchestrates interactions between the domain model and various
+ *        persistence
+ *        and notification ports.
  */
 
 @Service
@@ -35,13 +39,16 @@ public class PortfolioWriteOffService implements IPortfolioWriteOffCommandUseCas
 
     @Override
     @Transactional
+    @DocumentAuditable(operationType = DocumentOperationType.CREATE, moduleName = "WALLET")
     public PortfolioWriteOff createWriteOff(PortfolioWriteOff writeOff) {
-        // 1. El objeto de dominio ya viene creado y validado desde la capa de REST/Mapper.
-        //    Le pedimos al dominio que prepare las facturas.
-        List<InvoiceReplica> modifiedInvoices = writeOff.prepareInvoicesForWriteOff(invoiceProviderPort::findInvoiceById);
-        
+        // 1. El objeto de dominio ya viene creado y validado desde la capa de
+        // REST/Mapper.
+        // Le pedimos al dominio que prepare las facturas.
+        List<InvoiceReplica> modifiedInvoices = writeOff
+                .prepareInvoicesForWriteOff(invoiceProviderPort::findInvoiceById);
+
         writeOff.setCode(generateUniqueWriteOffCode());
-        
+
         // 3. Orquestar la persistencia
         for (InvoiceReplica invoice : modifiedInvoices) {
             invoiceProviderPort.updateInvoice(invoice);
@@ -54,6 +61,7 @@ public class PortfolioWriteOffService implements IPortfolioWriteOffCommandUseCas
     }
 
     @Override
+    @DocumentAuditable(operationType = DocumentOperationType.APPROVE, moduleName = "WALLET")
     public PortfolioWriteOff confirmWriteOff(Long writeOffId) {
         // 1. Cargar el Agregado Raíz
         PortfolioWriteOff writeOff = findWriteOffOrThrow(writeOffId);
@@ -67,7 +75,7 @@ public class PortfolioWriteOffService implements IPortfolioWriteOffCommandUseCas
             invoiceProviderPort.updateInvoice(invoice);
         }
         PortfolioWriteOff updatedWriteOff = writeOffPersistencePort.update(writeOff);
-        
+
         // 4. Publicar evento de dominio
         accountingEventPublisher.publishWriteOffConfirmedEvent(updatedWriteOff);
 
@@ -75,6 +83,7 @@ public class PortfolioWriteOffService implements IPortfolioWriteOffCommandUseCas
     }
 
     @Override
+    @DocumentAuditable(operationType = DocumentOperationType.VOID, moduleName = "WALLET")
     public PortfolioWriteOff voidWriteOffConfirmation(Long writeOffId) {
         // 1. Cargar el Agregado Raíz
         PortfolioWriteOff writeOff = findWriteOffOrThrow(writeOffId);
@@ -88,7 +97,7 @@ public class PortfolioWriteOffService implements IPortfolioWriteOffCommandUseCas
             invoiceProviderPort.updateInvoice(invoice);
         }
         PortfolioWriteOff updatedWriteOff = writeOffPersistencePort.update(writeOff);
-        
+
         // 4. Publicar evento de dominio
         accountingEventPublisher.publishWriteOffVoidedEvent(updatedWriteOff);
 
@@ -116,7 +125,8 @@ public class PortfolioWriteOffService implements IPortfolioWriteOffCommandUseCas
      */
     private PortfolioWriteOff findWriteOffOrThrow(Long writeOffId) {
         return writeOffPersistencePort.findById(writeOffId)
-                .orElseThrow(() -> new PortfolioWriteOffNotFoundException("Castigo de cartera con ID: " + writeOffId + " no fue encontrado."));
+                .orElseThrow(() -> new PortfolioWriteOffNotFoundException(
+                        "Castigo de cartera con ID: " + writeOffId + " no fue encontrado."));
     }
 
     private String generateUniqueWriteOffCode() {
