@@ -2,20 +2,15 @@ package debt_payments.application.service;
 
 import java.util.List;
 
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import debt_payments.application.input.IAccountingEventPublisher;
 import debt_payments.application.input.IPortfolioWriteOffCommandUseCase;
 import debt_payments.application.input.IPortfolioWriteOffQueryUseCase;
+import debt_payments.application.output.IAccountingEventPublisher;
 import debt_payments.application.output.IInvoiceProviderPort;
 import debt_payments.application.output.IPortfolioWriteOffPersistencePort;
 import debt_payments.application.output.IResourceUsageNotifierPort;
 import debt_payments.domain.exception.PortfolioWriteOffNotFoundException;
 import debt_payments.domain.model.PortfolioWriteOff;
 import debt_payments.domain.model.Replica.InvoiceReplica;
-import debt_payments.infraestructure.output.audit.annotation.DocumentAuditable;
-import debt_payments.infraestructure.output.audit.annotation.DocumentOperationType;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -28,7 +23,6 @@ import lombok.RequiredArgsConstructor;
  *        and notification ports.
  */
 
-@Service
 @RequiredArgsConstructor
 public class PortfolioWriteOffService implements IPortfolioWriteOffCommandUseCase, IPortfolioWriteOffQueryUseCase {
 
@@ -38,8 +32,6 @@ public class PortfolioWriteOffService implements IPortfolioWriteOffCommandUseCas
     private final IResourceUsageNotifierPort resourceUsageNotifier;
 
     @Override
-    @Transactional
-    @DocumentAuditable(operationType = DocumentOperationType.CREATE, moduleName = "WALLET")
     public PortfolioWriteOff createWriteOff(PortfolioWriteOff writeOff) {
         // 1. El objeto de dominio ya viene creado y validado desde la capa de
         // REST/Mapper.
@@ -61,7 +53,6 @@ public class PortfolioWriteOffService implements IPortfolioWriteOffCommandUseCas
     }
 
     @Override
-    @DocumentAuditable(operationType = DocumentOperationType.APPROVE, moduleName = "WALLET")
     public PortfolioWriteOff confirmWriteOff(Long writeOffId) {
         // 1. Cargar el Agregado Raíz
         PortfolioWriteOff writeOff = findWriteOffOrThrow(writeOffId);
@@ -83,7 +74,6 @@ public class PortfolioWriteOffService implements IPortfolioWriteOffCommandUseCas
     }
 
     @Override
-    @DocumentAuditable(operationType = DocumentOperationType.VOID, moduleName = "WALLET")
     public PortfolioWriteOff voidWriteOffConfirmation(Long writeOffId) {
         // 1. Cargar el Agregado Raíz
         PortfolioWriteOff writeOff = findWriteOffOrThrow(writeOffId);
@@ -105,13 +95,11 @@ public class PortfolioWriteOffService implements IPortfolioWriteOffCommandUseCas
     }
 
     @Override
-    @Transactional(readOnly = true)
     public PortfolioWriteOff findById(Long writeOffId) {
         return findWriteOffOrThrow(writeOffId);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<PortfolioWriteOff> findByEnterpriseId(String enterpriseId) {
         return writeOffPersistencePort.findByEnterpriseId(enterpriseId);
     }

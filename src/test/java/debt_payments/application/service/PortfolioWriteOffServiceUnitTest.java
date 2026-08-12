@@ -1,6 +1,6 @@
 package debt_payments.application.service;
 
-import debt_payments.application.input.IAccountingEventPublisher;
+import debt_payments.application.output.IAccountingEventPublisher;
 import debt_payments.application.output.IInvoiceProviderPort;
 import debt_payments.application.output.IPortfolioWriteOffPersistencePort;
 import debt_payments.application.output.IResourceUsageNotifierPort;

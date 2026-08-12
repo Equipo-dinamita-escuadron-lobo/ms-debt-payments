@@ -5,14 +5,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.springframework.stereotype.Service;
-
 import debt_payments.application.input.IInvoiceNotificationUseCase;
 import debt_payments.application.output.IInvoiceNotificationEventPublisher;
 import debt_payments.application.output.IInvoiceProviderPort;
+import debt_payments.domain.model.InvoiceDueReminder;
+import debt_payments.domain.model.InvoiceDueReminderDetail;
 import debt_payments.domain.model.Replica.InvoiceReplica;
-import debt_payments.infraestructure.output.messageBroker.dto.InvoiceDetailEventDto;
-import debt_payments.infraestructure.output.messageBroker.dto.InvoiceDueReminderEventDto;
 import lombok.RequiredArgsConstructor;
 
 /***
@@ -21,7 +19,6 @@ import lombok.RequiredArgsConstructor;
  * notification events for clients with pending invoices.
  */
 
-@Service
 @RequiredArgsConstructor
 public class InvoiceNotificationService implements IInvoiceNotificationUseCase {
 
@@ -50,25 +47,21 @@ public class InvoiceNotificationService implements IInvoiceNotificationUseCase {
             List<InvoiceReplica> clientInvoices = entry.getValue();
 
             // 4. Construir el evento CONSOLIDADO para este cliente
-            InvoiceDueReminderEventDto event = buildConsolidatedEvent(thirdPartyId, clientInvoices);
+            InvoiceDueReminder event = buildConsolidatedEvent(thirdPartyId, clientInvoices);
             
             // 5. Publicar UN ÚNICO evento por cliente
             notificationPublisher.publishInvoiceDueReminder(event);
         }
     }
 
-    private InvoiceDueReminderEventDto buildConsolidatedEvent(Long thirdPartyId, List<InvoiceReplica> invoices) {
+    private InvoiceDueReminder buildConsolidatedEvent(Long thirdPartyId, List<InvoiceReplica> invoices) {
         // Mapear la lista de InvoiceReplica a una lista de InvoiceDetailDto
-        List<InvoiceDetailEventDto> invoiceDetails = invoices.stream()
+        List<InvoiceDueReminderDetail> invoiceDetails = invoices.stream()
                 .map(this::buildInvoiceDetail)
                 .collect(Collectors.toList());
 
         // Crear el DTO consolidado
-        InvoiceDueReminderEventDto consolidatedDto = new InvoiceDueReminderEventDto();
-        consolidatedDto.setThirdPartyId(thirdPartyId);
-        consolidatedDto.setInvoiceDetails(invoiceDetails);
-        
-        return consolidatedDto;
+        return new InvoiceDueReminder(thirdPartyId, invoiceDetails);
     }
 
     /**
@@ -76,14 +69,9 @@ public class InvoiceNotificationService implements IInvoiceNotificationUseCase {
      * @param invoice The InvoiceReplica instance.
      * @return The constructed InvoiceDetailEventDto.
      */
-    private InvoiceDetailEventDto buildInvoiceDetail(InvoiceReplica invoice) {
-        InvoiceDetailEventDto detailDto = new InvoiceDetailEventDto();
-        detailDto.setInvoiceCode(Long.parseLong(invoice.getFactCode()));
-        detailDto.setInvoiceId(invoice.getId());
-        detailDto.setExpirationDate(invoice.getExpirationDate());
-        detailDto.setTotalAmount(invoice.getTotalValue());
-        detailDto.setPendingValue(invoice.getPendingValue());
-        return detailDto;
+    private InvoiceDueReminderDetail buildInvoiceDetail(InvoiceReplica invoice) {
+        return new InvoiceDueReminderDetail(invoice.getId(), Long.parseLong(invoice.getFactCode()),
+                invoice.getExpirationDate(), invoice.getTotalValue(), invoice.getPendingValue());
     }
     
 }

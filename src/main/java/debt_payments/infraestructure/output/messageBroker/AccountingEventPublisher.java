@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 
-import debt_payments.application.input.IAccountingEventPublisher;
+import debt_payments.application.output.IAccountingEventPublisher;
 import debt_payments.application.output.IInvoiceProviderPort;
 import debt_payments.domain.model.PortfolioWriteOff;
 import debt_payments.domain.model.Receipt;

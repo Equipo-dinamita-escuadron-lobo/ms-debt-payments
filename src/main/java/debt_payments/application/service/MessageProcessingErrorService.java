@@ -1,14 +1,11 @@
 package debt_payments.application.service;
 
-import org.springframework.stereotype.Service;
-
 import debt_payments.application.input.IMessageProcessingErrorCommandPort;
 import debt_payments.application.input.IMessageProcessingErrorQueryPort;
 import debt_payments.application.output.IMessageProcessingErrorPersistencePort;
 import debt_payments.domain.model.MessageProcessingError;
 import lombok.RequiredArgsConstructor;
 
-@Service
 @RequiredArgsConstructor
 public class MessageProcessingErrorService implements IMessageProcessingErrorCommandPort, IMessageProcessingErrorQueryPort{
     

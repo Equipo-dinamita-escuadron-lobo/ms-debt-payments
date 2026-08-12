@@ -19,7 +19,7 @@ import debt_payments.application.output.IInvoiceProviderPort;
 import debt_payments.application.output.IReceiptCommandPersistencePort;
 import debt_payments.application.output.IReceiptQueryPersistencePort;
 import debt_payments.application.output.IResourceUsageNotifierPort;
-import debt_payments.application.input.IAccountingEventPublisher;
+import debt_payments.application.output.IAccountingEventPublisher;
 import debt_payments.domain.exception.ReceiptNotFoundException;
 import debt_payments.domain.model.Receipt;
 import debt_payments.domain.model.Replica.InvoiceReplica;

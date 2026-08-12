@@ -3,12 +3,9 @@ package debt_payments.application.service;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import debt_payments.application.input.IAccountingEventPublisher;
 import debt_payments.application.input.IReceiptCommandUseCase;
 import debt_payments.application.input.IReceiptQueryUseCase;
+import debt_payments.application.output.IAccountingEventPublisher;
 import debt_payments.application.output.IInvoiceProviderPort;
 import debt_payments.application.output.IReceiptCommandPersistencePort;
 import debt_payments.application.output.IReceiptQueryPersistencePort;
@@ -17,8 +14,6 @@ import debt_payments.domain.exception.ReceiptNotFoundException;
 import debt_payments.domain.model.Receipt;
 import debt_payments.domain.model.ReceiptStatus;
 import debt_payments.domain.model.Replica.InvoiceReplica;
-import debt_payments.infraestructure.output.audit.annotation.DocumentAuditable;
-import debt_payments.infraestructure.output.audit.annotation.DocumentOperationType;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -28,7 +23,6 @@ import lombok.RequiredArgsConstructor;
  *        receipts.
  */
 
-@Service
 @RequiredArgsConstructor
 public class ReceiptService implements IReceiptCommandUseCase, IReceiptQueryUseCase {
 
@@ -46,8 +40,6 @@ public class ReceiptService implements IReceiptCommandUseCase, IReceiptQueryUseC
      * @return The created receipt with updated fields.
      */
     @Override
-    @Transactional
-    @DocumentAuditable(operationType = DocumentOperationType.CREATE, moduleName = "WALLET")
     public Receipt createReceipt(Receipt receipt) {
 
         // Generar un código único para el recibo
@@ -84,8 +76,6 @@ public class ReceiptService implements IReceiptCommandUseCase, IReceiptQueryUseC
     }
 
     @Override
-    @Transactional
-    @DocumentAuditable(operationType = DocumentOperationType.VOID, moduleName = "WALLET")
     public Receipt voidReceipt(Long receiptId, String reasonDescription) {
         Receipt receiptToVoid = receiptQueryPersistencePort.findById(receiptId)
                 .orElseThrow(() -> new ReceiptNotFoundException("Receipt with id " + receiptId + " does not exist."));
@@ -118,26 +108,22 @@ public class ReceiptService implements IReceiptCommandUseCase, IReceiptQueryUseC
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Receipt findById(Long id) {
         return receiptQueryPersistencePort.findById(id)
                 .orElseThrow(() -> new ReceiptNotFoundException("El recibo con ID " + id + " no fue encontrado."));
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<Receipt> findByInvoiceId(String invoiceId) {
         return receiptQueryPersistencePort.findByInvoiceId(invoiceId);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<Receipt> findByThirdPartyId(String thirdPartyId, String enterpriseId) {
         return receiptQueryPersistencePort.findByThirdPartyId(thirdPartyId, enterpriseId);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<Receipt> findByEnterpriseId(String enterpriseId) {
         return receiptQueryPersistencePort.findByEnterpriseId(enterpriseId);
     }

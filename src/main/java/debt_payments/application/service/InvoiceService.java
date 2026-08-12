@@ -3,8 +3,6 @@ package debt_payments.application.service;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.springframework.stereotype.Service;
-
 import debt_payments.application.input.IInvoiceCommandUseCase;
 import debt_payments.application.input.IInvoiceQueryUseCase;
 import debt_payments.application.output.IInvoiceProviderPort;
@@ -20,7 +18,6 @@ import lombok.RequiredArgsConstructor;
  * and retrieving invoices based on various criteria.
  */
 
-@Service
 @RequiredArgsConstructor
 public class InvoiceService implements IInvoiceCommandUseCase, IInvoiceQueryUseCase {
 
